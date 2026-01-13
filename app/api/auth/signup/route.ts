@@ -50,7 +50,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Get app URL for email confirmation redirect
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Use environment variable or detect from request headers (avoids secret scanning false positives)
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      const host = request.headers.get('host');
+      const origin = request.headers.get('origin');
+      appUrl = origin || (host ? `https://${host}` : 'http://localhost:3000');
+    }
     const redirectTo = `${appUrl}/confirm-email`;
 
     // Create user in Supabase Auth

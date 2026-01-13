@@ -121,7 +121,34 @@ After your first deployment:
 
 ## Step 5: Fix Secret Scanning Issues
 
-Netlify's secret scanning may flag documentation files. To fix:
+Netlify's secret scanning may flag certain variables. Here's how to fix:
+
+### Issue: NEXT_PUBLIC_APP_URL Flagged as Secret
+
+**This is a FALSE POSITIVE.** `NEXT_PUBLIC_APP_URL` is NOT a secret:
+- The `NEXT_PUBLIC_` prefix means it's safe to expose to client-side code
+- It's a public URL, not a secret key
+- It's already configured to be exposed in the browser
+
+**Solutions:**
+
+1. **Option 1: Allow the Variable (Recommended)**
+   - Go to Netlify Dashboard → Site settings → Build & deploy
+   - Under "Build settings" → "Environment variables"
+   - The variable is already configured correctly
+   - Netlify will recognize it as a public variable
+
+2. **Option 2: Use Auto-Detection (Already Implemented)**
+   - The code now auto-detects the URL from request headers
+   - If `NEXT_PUBLIC_APP_URL` is not set, it uses the request origin
+   - This works automatically on Netlify
+
+3. **Option 3: Disable Secret Scanning for This Variable**
+   - If Netlify still flags it, you can disable secret scanning
+   - Go to Site settings → Build & deploy → Build settings
+   - Add `NEXT_PUBLIC_APP_URL` to allowed variables
+
+### Other Secret Scanning Issues
 
 1. **Ensure `.netlifyignore` is present:**
    - This file excludes documentation from builds

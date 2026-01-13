@@ -6,6 +6,7 @@ API_DOCUMENTATION.md
 FRAMER_INTEGRATION.md
 IMPLEMENTATION_SUMMARY.md
 SUPABASE_EMAIL_CONFIG.md
+netlify-secrets-ignore.txt
 
 # Environment files
 .env
