@@ -59,13 +59,13 @@ export async function GET(request: NextRequest) {
         .eq('agent_id', user.id);
 
       const totalListings = listings?.length || 0;
-      const pendingListings = listings?.filter(l => l.status === 'pending_review').length || 0;
-      const approvedListings = listings?.filter(l => l.status === 'approved').length || 0;
+      const pendingListings = listings?.filter((l: any) => l.status === 'pending_review').length || 0;
+      const approvedListings = listings?.filter((l: any) => l.status === 'approved').length || 0;
       const totalApplications = applications?.length || 0;
-      const pendingApplications = applications?.filter(a => 
+      const pendingApplications = applications?.filter((a: any) => 
         a.status === 'submitted' || a.status === 'under_review'
       ).length || 0;
-      const acceptedApplications = applications?.filter(a => a.status === 'accepted').length || 0;
+      const acceptedApplications = applications?.filter((a: any) => a.status === 'accepted').length || 0;
 
       return NextResponse.json({
         total_listings: totalListings,

@@ -36,12 +36,18 @@ export async function POST(request: NextRequest) {
 
     // Get app URL for redirect
     // Auto-detect from request headers to avoid secret scanning issues
-    const host = request.headers.get('host');
-    const origin = request.headers.get('origin');
-    const protocol = request.headers.get('x-forwarded-proto') || 'https';
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                   origin || 
-                   (host ? `${protocol}://${host}` : null);
+    let appUrl: string | null = null;
+    try {
+      const host = request.headers?.get('host');
+      const origin = request.headers?.get('origin');
+      const protocol = request.headers?.get('x-forwarded-proto') || 'https';
+      appUrl = process.env.NEXT_PUBLIC_APP_URL || 
+               origin || 
+               (host ? `${protocol}://${host}` : null);
+    } catch (error) {
+      console.error('Error getting app URL from headers:', error);
+      appUrl = process.env.NEXT_PUBLIC_APP_URL || null;
+    }
     
     if (!appUrl) {
       return NextResponse.json(
