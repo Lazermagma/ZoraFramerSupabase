@@ -67,9 +67,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate status value
-    if (!['approved', 'rejected'].includes(status)) {
+    const validStatuses = ['submitted', 'viewed', 'under_review', 'accepted', 'rejected'];
+    if (!validStatuses.includes(status)) {
       return NextResponse.json(
-        { error: 'Invalid status. Must be "approved" or "rejected"' },
+        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
         { status: 400 }
       );
     }
@@ -99,21 +100,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify application is in pending status
-    if (application.status !== 'pending') {
-      return NextResponse.json(
-        { error: `Application is not pending. Current status: ${application.status}` },
-        { status: 400 }
-      );
+    // Update application status
+    const updateData: any = {
+      status: status as ApplicationStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Set viewed_at if status is 'viewed'
+    if (status === 'viewed' && !application.viewed_at) {
+      updateData.viewed_at = new Date().toISOString();
     }
 
-    // Update application status
     const { data: updatedApplication, error: updateError } = await supabaseAdmin
       .from('applications')
-      .update({
-        status: status as ApplicationStatus,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', application_id)
       .select()
       .single();

@@ -2,12 +2,14 @@
  * Application types
  * 
  * Status flow:
- * - pending: Submitted by buyer, awaiting agent review
- * - approved: Accepted by agent
+ * - submitted: Submitted by buyer
+ * - viewed: Agent has viewed the application
+ * - under_review: Agent is reviewing the application
+ * - accepted: Accepted by agent
  * - rejected: Declined by agent
  */
 
-export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
+export type ApplicationStatus = 'submitted' | 'viewed' | 'under_review' | 'accepted' | 'rejected';
 
 export interface Application {
   id: string;
@@ -16,8 +18,16 @@ export interface Application {
   agent_id: string;
   status: ApplicationStatus;
   message?: string;
+  documents?: string[];
   created_at: string;
   updated_at: string;
+  viewed_at?: string;
+}
+
+export interface CreateApplicationRequest {
+  listing_id: string;
+  message?: string;
+  documents?: string[];
 }
 
 export interface UpdateApplicationStatusRequest {

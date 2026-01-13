@@ -80,7 +80,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create listing with status = "pending_review"
+    // Create listing with status (default to 'draft' if not specified)
+    const listingStatus = body.status || 'draft';
+    
+    if (listingStatus !== 'draft' && listingStatus !== 'pending_review') {
+      return NextResponse.json(
+        { error: 'Invalid status. Must be "draft" or "pending_review"' },
+        { status: 400 }
+      );
+    }
+
     const { data: listing, error: listingError } = await supabaseAdmin
       .from('listings')
       .insert({
@@ -90,7 +99,9 @@ export async function POST(request: NextRequest) {
         price,
         location,
         images: images || [],
-        status: 'pending_review',
+        documents: body.documents || [],
+        status: listingStatus,
+        views: 0,
       })
       .select()
       .single();
