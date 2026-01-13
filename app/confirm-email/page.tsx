@@ -34,6 +34,7 @@ function ConfirmEmailContent() {
     // Exchange token for session
     const confirmEmail = async () => {
       try {
+        // Auto-detect from current location (avoids secret scanning issues)
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
         const response = await fetch(`${appUrl}/api/auth/confirm-email`, {
           method: 'POST',

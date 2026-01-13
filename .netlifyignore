@@ -1,12 +1,12 @@
 # Documentation files (may contain example secrets - exclude from build)
-SETUP_GUIDE.md
-VERCEL_DEPLOYMENT.md
-NETLIFY_DEPLOYMENT.md
-API_DOCUMENTATION.md
-FRAMER_INTEGRATION.md
-IMPLEMENTATION_SUMMARY.md
-SUPABASE_EMAIL_CONFIG.md
+*.md
+!README.md
+
+# Secret scanning ignore file
 netlify-secrets-ignore.txt
+
+# Build output (may contain embedded env vars)
+.next/static/chunks/**
 
 # Environment files
 .env

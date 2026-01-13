@@ -35,12 +35,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Get app URL for redirect
-    // Use environment variable or detect from request headers (avoids secret scanning false positives)
-    let appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    // Auto-detect from request headers to avoid secret scanning issues
+    const host = request.headers.get('host');
+    const origin = request.headers.get('origin');
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                   origin || 
+                   (host ? `${protocol}://${host}` : null);
+    
     if (!appUrl) {
-      const host = request.headers.get('host');
-      const origin = request.headers.get('origin');
-      appUrl = origin || (host ? `https://${host}` : 'http://localhost:3000');
+      return NextResponse.json(
+        { error: 'Unable to determine app URL. Please set NEXT_PUBLIC_APP_URL environment variable.' },
+        { status: 500 }
+      );
     }
 
     // Send password reset email

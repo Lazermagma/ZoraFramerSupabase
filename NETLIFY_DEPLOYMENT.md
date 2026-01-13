@@ -132,21 +132,26 @@ Netlify's secret scanning may flag certain variables. Here's how to fix:
 
 **Solutions:**
 
-1. **Option 1: Allow the Variable (Recommended)**
+1. **Option 1: Configure Netlify to Ignore This Variable (Recommended)**
    - Go to Netlify Dashboard → Site settings → Build & deploy
    - Under "Build settings" → "Environment variables"
-   - The variable is already configured correctly
-   - Netlify will recognize it as a public variable
+   - Add a new environment variable:
+     - **Key:** `SECRETS_SCAN_OMIT_KEYS`
+     - **Value:** `NEXT_PUBLIC_APP_URL`
+   - This tells Netlify to skip scanning this variable
 
-2. **Option 2: Use Auto-Detection (Already Implemented)**
-   - The code now auto-detects the URL from request headers
-   - If `NEXT_PUBLIC_APP_URL` is not set, it uses the request origin
+2. **Option 2: Don't Set the Variable (Auto-Detection)**
+   - Don't set `NEXT_PUBLIC_APP_URL` in Netlify environment variables
+   - The code auto-detects the URL from request headers
    - This works automatically on Netlify
+   - No secret scanning issues
 
-3. **Option 3: Disable Secret Scanning for This Variable**
-   - If Netlify still flags it, you can disable secret scanning
+3. **Option 3: Disable Secret Scanning Entirely (Not Recommended)**
    - Go to Site settings → Build & deploy → Build settings
-   - Add `NEXT_PUBLIC_APP_URL` to allowed variables
+   - Add environment variable:
+     - **Key:** `SECRETS_SCAN_ENABLED`
+     - **Value:** `false`
+   - ⚠️ This disables all secret scanning (not recommended for security)
 
 ### Other Secret Scanning Issues
 

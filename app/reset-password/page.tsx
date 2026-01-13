@@ -58,7 +58,8 @@ function ResetPasswordContent() {
     setMessage('Resetting password...');
 
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        // Auto-detect from current location (avoids secret scanning issues)
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       const response = await fetch(`${appUrl}/api/auth/reset-password`, {
         method: 'POST',
         headers: {

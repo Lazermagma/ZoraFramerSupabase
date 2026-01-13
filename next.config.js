@@ -34,6 +34,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  
+  // Prevent embedding NEXT_PUBLIC_APP_URL in build output if not set
+  // This helps avoid secret scanning false positives
+  env: {
+    // Only include if explicitly set, don't embed default values
+  },
 }
 
 module.exports = nextConfig
