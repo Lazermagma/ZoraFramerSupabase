@@ -1,0 +1,50 @@
+# Documentation files (may contain example secrets - exclude from build)
+SETUP_GUIDE.md
+VERCEL_DEPLOYMENT.md
+NETLIFY_DEPLOYMENT.md
+API_DOCUMENTATION.md
+FRAMER_INTEGRATION.md
+IMPLEMENTATION_SUMMARY.md
+SUPABASE_EMAIL_CONFIG.md
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# Development files
+.vscode/
+.idea/
+*.log
+
+# Test files
+**/__tests__/**
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Build artifacts
+.next/
+out/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Vercel (if switching from Vercel)
+.vercel/
+vercel.json
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS files
+.DS_Store
+Thumbs.db

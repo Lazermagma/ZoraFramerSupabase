@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "netlify-build": "next build"
   },
   "dependencies": {
+    "@netlify/plugin-nextjs": "^4.41.5",
     "@supabase/supabase-js": "^2.39.0",
     "next": "^16.0.0",
     "react": "^18.2.0",

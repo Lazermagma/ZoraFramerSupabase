@@ -1,20 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // API-only project - optimized for Vercel
-  output: 'standalone',
+  // API-only project - optimized for serverless (Vercel/Netlify)
+  // Netlify plugin handles output automatically
   
   // Use Node.js runtime for all API routes (required for Supabase and Stripe)
-  // Vercel will automatically detect and use Node.js runtime
+  // Netlify Functions will handle API routes via @netlify/plugin-nextjs
   
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-  },
-  
-  // Ensure proper handling of environment variables
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   
   // Optimize for serverless
@@ -33,6 +28,11 @@ const nextConfig = {
         ],
       },
     ]
+  },
+  
+  // Disable image optimization (not needed for API-only)
+  images: {
+    unoptimized: true,
   },
 }
 

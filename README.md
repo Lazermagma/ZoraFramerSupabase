@@ -263,7 +263,18 @@ All endpoints require authentication via Supabase access token:
 
 ## 🚢 Deployment
 
-### Vercel
+### Netlify (Recommended)
+
+**Quick Deploy:**
+1. Push code to GitHub
+2. Import project in Netlify Dashboard
+3. Add environment variables in Netlify dashboard
+4. Deploy
+
+**Detailed Instructions:**
+See [NETLIFY_DEPLOYMENT.md](./NETLIFY_DEPLOYMENT.md) for complete deployment guide.
+
+### Vercel (Alternative)
 
 **Quick Deploy:**
 1. Push code to GitHub
