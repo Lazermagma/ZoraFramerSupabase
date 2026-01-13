@@ -265,12 +265,31 @@ All endpoints require authentication via Supabase access token:
 
 ### Vercel
 
+**Quick Deploy:**
 1. Push code to GitHub
-2. Import project in Vercel
+2. Import project in Vercel Dashboard
 3. Add environment variables in Vercel dashboard
 4. Deploy
 
-The project is configured with `output: 'standalone'` for optimal Vercel deployment.
+**Detailed Instructions:**
+See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for complete deployment guide.
+
+**Environment Variables Required:**
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_AGENT_MONTHLY_PRICE_ID`
+- `STRIPE_AGENT_YEARLY_PRICE_ID`
+- `STRIPE_BUYER_MONTHLY_PRICE_ID`
+- `STRIPE_BUYER_YEARLY_PRICE_ID`
+- `NEXT_PUBLIC_APP_URL` (set to your Vercel URL after first deploy)
+
+**Configuration:**
+- Project is configured with `output: 'standalone'` for optimal Vercel deployment
+- All API routes use Node.js runtime (required for Supabase/Stripe)
+- CORS headers configured in `next.config.js`
+- Function timeout set to 30 seconds in `vercel.json`
 
 ## 🔒 Security Notes
 
