@@ -37,13 +37,29 @@ This project provides a backend API layer with:
 
 ## 🚀 Setup
 
-### 1. Install Dependencies
+> **⚠️ IMPORTANT**: Before running the API, you must set up your Supabase database schema. See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for complete instructions.
+
+### 1. Set Up Supabase Database
+
+**CRITICAL**: Run the database schema first!
+
+1. Go to your Supabase project: https://app.supabase.com
+2. Navigate to **SQL Editor**
+3. Open `supabase/schema.sql` from this project
+4. Copy and run the entire SQL script
+5. Create storage bucket `documents` (see `supabase/storage-setup.sql`)
+
+**Without this step, all API calls will fail!**
+
+See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for detailed instructions.
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Environment Variables
+### 3. Environment Variables
 
 Create a `.env.local` file in the root directory:
 
@@ -64,7 +80,7 @@ STRIPE_BUYER_YEARLY_PRICE_ID=price_xxx
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### 3. Run Development Server
+### 4. Run Development Server
 
 ```bash
 npm run dev
