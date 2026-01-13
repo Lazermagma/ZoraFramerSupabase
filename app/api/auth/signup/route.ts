@@ -49,11 +49,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get app URL for email confirmation redirect
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const redirectTo = `${appUrl}/confirm-email`;
+
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: redirectTo,
         data: {
           role,
           name: name || '',
@@ -94,7 +99,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get session
+    // Check if session was returned from signUp (email confirmation disabled)
+    if (authData.session) {
+      return NextResponse.json({
+        user: profileData,
+        session: {
+          access_token: authData.session.access_token,
+          refresh_token: authData.session.refresh_token,
+          expires_at: authData.session.expires_at,
+        },
+      }, { status: 201 });
+    }
+
+    // If no session (email confirmation required), check if user needs confirmation
+    if (authData.user && !authData.user.email_confirmed_at) {
+      return NextResponse.json({
+        user: profileData,
+        message: 'Account created successfully. Please check your email to confirm your account.',
+        requires_confirmation: true,
+      }, { status: 201 });
+    }
+
+    // Try to sign in (in case user was auto-confirmed)
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.signInWithPassword({
       email,
       password,
@@ -102,7 +128,11 @@ export async function POST(request: NextRequest) {
 
     if (sessionError || !sessionData.session) {
       return NextResponse.json(
-        { error: 'Account created but failed to create session' },
+        { 
+          error: 'Account created but failed to create session',
+          details: sessionError?.message || 'Please check your email to confirm your account',
+          requires_confirmation: true,
+        },
         { status: 500 }
       );
     }

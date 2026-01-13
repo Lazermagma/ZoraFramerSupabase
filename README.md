@@ -280,9 +280,84 @@ The project is configured with `output: 'standalone'` for optimal Vercel deploym
 - API adds additional validation layer
 - All routes use Node.js runtime (not Edge)
 
+## 📧 Email Confirmation & Customization
+
+### Email Confirmation Setup
+
+The API supports email confirmation for new user signups. When email confirmation is enabled in Supabase, users receive an email with a confirmation link.
+
+**Custom Confirmation Page:**
+- Location: `app/confirm-email/page.tsx`
+- Automatically confirms email when user clicks link
+- Fully customizable to match your Framer design
+
+**Custom Password Reset Page:**
+- Location: `app/reset-password/page.tsx`
+- Allows users to set new password
+- Fully customizable styling
+
+### Configure Supabase Redirect URLs
+
+1. Go to **Supabase Dashboard** → **Authentication** → **URL Configuration**
+2. Add these redirect URLs:
+   - `http://localhost:3000/confirm-email` (development)
+   - `http://localhost:3000/reset-password` (development)
+   - `https://your-app.vercel.app/confirm-email` (production)
+   - `https://your-app.vercel.app/reset-password` (production)
+
+### Customize Email Templates
+
+1. Go to **Authentication** → **Email Templates** in Supabase
+2. Customize:
+   - **Confirm signup** template
+   - **Reset password** template
+3. Use variables: `{{ .ConfirmationURL }}`, `{{ .Email }}`, `{{ .SiteURL }}`
+
+### Customize Confirmation Pages
+
+**Email Confirmation Page (`app/confirm-email/page.tsx`):**
+- Update colors, fonts, and styling to match your brand
+- Add your logo
+- Modify success/error messages
+- Change redirect destinations
+
+**Password Reset Page (`app/reset-password/page.tsx`):**
+- Customize form styling
+- Update button colors
+- Add branding elements
+
+### Enable/Disable Email Confirmation
+
+**For Development (Faster Testing):**
+1. Go to **Authentication** → **Settings**
+2. Find **"Confirm email"** toggle
+3. Turn it **OFF**
+4. Users will be signed in immediately after signup
+
+**For Production (Recommended):**
+1. Keep **"Confirm email"** toggle **ON**
+2. Users must confirm email before accessing the app
+3. Provides better security
+
+### Email Confirmation Flow
+
+1. User signs up → Account created
+2. If email confirmation enabled:
+   - User receives confirmation email
+   - Response includes `requires_confirmation: true`
+   - User clicks link → Redirects to `/confirm-email` page
+   - Page confirms email → Redirects to sign in or dashboard
+3. If email confirmation disabled:
+   - Session created immediately
+   - User can access app right away
+
+**See [SUPABASE_EMAIL_CONFIG.md](./SUPABASE_EMAIL_CONFIG.md) for detailed configuration guide.**
+
 ## 📝 Notes
 
 - No webhooks configured for Stripe - payment status handled via Supabase
 - All API routes use `runtime = 'nodejs'` for full Node.js compatibility
 - TypeScript types are provided for all request/response bodies
 - Error responses follow consistent format: `{ error: string }`
+- Email confirmation pages are fully customizable
+- Password reset uses custom pages instead of Supabase default

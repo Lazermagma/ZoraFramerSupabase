@@ -42,32 +42,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify token and update password
-    // Note: Supabase handles token verification through the reset link
-    // This endpoint should be called after user clicks the reset link
-    // The token is typically handled by Supabase's built-in reset flow
-    
-    // For API-based reset, we need to use the admin client
-    // First, verify the token by attempting to get the user
-    const { data: { user }, error: verifyError } = await supabaseAdmin.auth.getUser(token);
+    // Exchange token for session and update password
+    // Supabase password reset tokens need to be exchanged first
+    try {
+      // Try to exchange the token (this verifies it's valid)
+      // Note: The token from email is an access_token, not a regular token
+      // We need to use it to get the user, then update password
+      
+      // First, try to get user from the token
+      const { data: { user }, error: verifyError } = await supabaseAdmin.auth.getUser(token);
 
-    if (verifyError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid or expired reset token' },
-        { status: 400 }
+      if (verifyError || !user) {
+        // If that doesn't work, the token might be in the hash format
+        // Try using updateUser with the token directly
+        return NextResponse.json(
+          { error: 'Invalid or expired reset token. Please request a new password reset link.' },
+          { status: 400 }
+        );
+      }
+
+      // Update password using admin API
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        user.id,
+        { password: new_password }
       );
-    }
 
-    // Update password
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      user.id,
-      { password: new_password }
-    );
-
-    if (updateError) {
+      if (updateError) {
+        return NextResponse.json(
+          { error: 'Failed to reset password', details: updateError.message },
+          { status: 500 }
+        );
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
       return NextResponse.json(
-        { error: 'Failed to reset password', details: updateError.message },
-        { status: 500 }
+        { error: 'Invalid or expired reset token. Please request a new password reset link.' },
+        { status: 400 }
       );
     }
 
