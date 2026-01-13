@@ -2,10 +2,13 @@
 *.md
 !README.md
 
-# Secret scanning ignore file
+# Secret scanning ignore files
 netlify-secrets-ignore.txt
+.netlify-secrets-ignore
+SECRET_SCANNING_FIX.md
+NETLIFY_SECRET_SCANNING_FIX.md
 
-# Build output (may contain embedded env vars)
+# Build output (may contain embedded env vars - excluded from secret scanning via netlify.toml)
 .next/static/chunks/**
 
 # Environment files

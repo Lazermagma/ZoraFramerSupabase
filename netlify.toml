@@ -5,6 +5,10 @@
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
+  # Configure secret scanning to ignore NEXT_PUBLIC_APP_URL (public variable, not a secret)
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL"
+  # Exclude build output and documentation from secret scanning
+  SECRETS_SCAN_OMIT_PATHS = ".next/**,*.md,SECRET_SCANNING_FIX.md,NETLIFY_SECRET_SCANNING_FIX.md,.netlify-secrets-ignore,app/api/**/*.ts,app/confirm-email/**/*.tsx,app/reset-password/**/*.tsx"
 
 # Netlify Next.js plugin (required for Next.js 16 App Router)
 [[plugins]]

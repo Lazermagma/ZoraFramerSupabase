@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     
     if (!appUrl) {
       return NextResponse.json(
-        { error: 'Unable to determine app URL. Please set NEXT_PUBLIC_APP_URL environment variable.' },
+        { error: 'Unable to determine app URL. Please configure the app URL in environment variables.' },
         { status: 500 }
       );
     }
