@@ -31,7 +31,9 @@ Creates a new user account with role selection.
   "email": "user@example.com",
   "password": "password123",
   "role": "buyer" | "agent",
-  "name": "John Doe",        // optional
+  "first_name": "John",      // optional
+  "last_name": "Doe",        // optional
+  "name": "John Doe",        // optional (deprecated, kept for backward compatibility)
   "phone": "+1234567890",    // optional
   "parish": "Kingston"       // optional
 }
@@ -156,6 +158,8 @@ Gets current user profile.
   "user": {
     "id": "...",
     "email": "...",
+    "first_name": "...",
+    "last_name": "...",
     "name": "...",
     "phone": "...",
     "parish": "...",
@@ -176,9 +180,11 @@ Updates user profile.
 **Request Body:**
 ```json
 {
-  "name": "New Name",      // optional
-  "phone": "+1234567890",  // optional
-  "parish": "New Parish"   // optional
+  "first_name": "John",      // optional
+  "last_name": "Doe",        // optional
+  "name": "New Name",        // optional (deprecated, kept for backward compatibility)
+  "phone": "+1234567890",    // optional
+  "parish": "New Parish"     // optional
 }
 ```
 
@@ -654,7 +660,7 @@ All endpoints return errors in this format:
 
 Ensure your Supabase database has the following tables:
 
-- `users` (id, email, role, name, phone, parish, account_status, created_at, updated_at)
+- `users` (id, email, role, first_name, last_name, name, phone, parish, account_status, created_at, updated_at)
 - `listings` (id, agent_id, title, description, price, location, status, images, documents, views, created_at, updated_at, published_at, expires_at)
 - `applications` (id, listing_id, buyer_id, agent_id, status, message, documents, created_at, updated_at, viewed_at)
 - `subscriptions` (id, user_id, status, stripe_subscription_id, stripe_customer_id, plan_type, created_at, updated_at, expires_at)

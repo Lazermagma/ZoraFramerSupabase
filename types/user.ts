@@ -15,7 +15,9 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
-  name?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string; // Deprecated: kept for backward compatibility
   phone?: string;
   parish?: string;
   account_status: AccountStatus;
@@ -33,7 +35,9 @@ export interface SignUpRequest {
   email: string;
   password: string;
   role: 'buyer' | 'agent';
-  name?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string; // Deprecated: kept for backward compatibility
   phone?: string;
   parish?: string;
 }
@@ -44,7 +48,9 @@ export interface SignInRequest {
 }
 
 export interface UpdateProfileRequest {
-  name?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string; // Deprecated: kept for backward compatibility
   phone?: string;
   parish?: string;
 }

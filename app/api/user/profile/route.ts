@@ -8,7 +8,7 @@
  * 
  * PUT https://your-api.vercel.app/api/user/profile
  * Headers: Authorization: Bearer <token>
- * Body: { "name": "...", "phone": "...", "parish": "..." }
+ * Body: { "first_name": "...", "last_name": "...", "phone": "...", "parish": "..." }
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -66,10 +66,31 @@ export async function PUT(request: NextRequest) {
     }
 
     const body: UpdateProfileRequest = await request.json();
-    const { name, phone, parish } = body;
+    const { first_name, last_name, name, phone, parish } = body;
+
+    // Get current user data to build full name if needed
+    const { data: currentUser } = await supabaseAdmin
+      .from('users')
+      .select('first_name, last_name')
+      .eq('id', authResult.user.id)
+      .single();
 
     const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
+    if (first_name !== undefined) updateData.first_name = first_name;
+    if (last_name !== undefined) updateData.last_name = last_name;
+    
+    // Support legacy name field, or auto-generate from first_name/last_name
+    if (name !== undefined) {
+      updateData.name = name;
+    } else if (first_name !== undefined || last_name !== undefined) {
+      // Auto-generate full name from first_name and last_name if name not provided
+      const finalFirstName = first_name !== undefined ? first_name : (currentUser?.first_name || '');
+      const finalLastName = last_name !== undefined ? last_name : (currentUser?.last_name || '');
+      if (finalFirstName || finalLastName) {
+        updateData.name = `${finalFirstName} ${finalLastName}`.trim();
+      }
+    }
+    
     if (phone !== undefined) updateData.phone = phone;
     if (parish !== undefined) updateData.parish = parish;
     updateData.updated_at = new Date().toISOString();

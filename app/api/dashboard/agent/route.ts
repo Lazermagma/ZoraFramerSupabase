@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     const { data: applications, error: appError } = listingIds.length > 0
       ? await supabaseAdmin
           .from('applications')
-          .select('*, buyer:users!applications_buyer_id_fkey(id, name, email, phone), listing:listings(*)')
+          .select('*, buyer:users!applications_buyer_id_fkey(id, first_name, last_name, name, email, phone), listing:listings(*)')
           .in('listing_id', listingIds)
           .order('created_at', { ascending: false })
       : { data: [], error: null };

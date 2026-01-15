@@ -10,7 +10,8 @@
  *     "email": "user@example.com",
  *     "password": "password123",
  *     "role": "buyer" | "agent",
- *     "name": "John Doe", // optional
+ *     "first_name": "John", // optional
+ *     "last_name": "Doe", // optional
  *     "phone": "+1234567890", // optional
  *     "parish": "Kingston" // optional
  *   }
@@ -31,7 +32,7 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const body: SignUpRequest = await request.json();
-    const { email, password, role, name, phone, parish } = body;
+    const { email, password, role, first_name, last_name, name, phone, parish } = body;
 
     // Validate required fields
     if (!email || !password || !role) {
@@ -81,7 +82,9 @@ export async function POST(request: NextRequest) {
         emailRedirectTo: redirectTo,
         data: {
           role,
-          name: name || '',
+          first_name: first_name || '',
+          last_name: last_name || '',
+          name: name || (first_name && last_name ? `${first_name} ${last_name}` : '') || '',
           phone: phone || '',
           parish: parish || '',
         },
@@ -96,13 +99,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user profile in database
+    // Support both first_name/last_name and legacy name field
+    const fullName = name || (first_name && last_name ? `${first_name} ${last_name}` : null);
     const { data: profileData, error: profileError } = await supabaseAdmin
       .from('users')
       .insert({
         id: authData.user.id,
         email,
         role,
-        name: name || null,
+        first_name: first_name || null,
+        last_name: last_name || null,
+        name: fullName,
         phone: phone || null,
         parish: parish || null,
         account_status: 'active',
