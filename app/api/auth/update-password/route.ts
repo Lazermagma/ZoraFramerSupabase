@@ -9,8 +9,10 @@
  *   Authorization: Bearer <supabase_access_token>
  * Body:
  *   {
- *     "current_password": "oldpassword",
- *     "new_password": "newpassword123"
+ *     "email": "user@example.com",
+ *     "new_password": "newpassword123",
+ *     "confirm_password": "newpassword123",
+ *     "current_password": "oldpassword" // Optional, but recommended for security
  *   }
  * 
  * RESPONSE:
@@ -40,15 +42,33 @@ export async function POST(request: NextRequest) {
     }
 
     const body: UpdatePasswordRequest = await request.json();
-    const { current_password, new_password } = body;
+    const { email, new_password, confirm_password, current_password } = body;
 
-    if (!current_password || !new_password) {
+    // Validate required fields
+    if (!email || !new_password || !confirm_password) {
       return NextResponse.json(
-        { error: 'Missing required fields: current_password, new_password' },
+        { error: 'Missing required fields: email, new_password, confirm_password' },
         { status: 400 }
       );
     }
 
+    // Verify email matches the logged-in user
+    if (email.toLowerCase() !== authResult.user.email.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'Email does not match your account' },
+        { status: 400 }
+      );
+    }
+
+    // Validate password confirmation matches
+    if (new_password !== confirm_password) {
+      return NextResponse.json(
+        { error: 'New password and confirm password do not match' },
+        { status: 400 }
+      );
+    }
+
+    // Validate password length
     if (new_password.length < 6) {
       return NextResponse.json(
         { error: 'New password must be at least 6 characters' },
@@ -56,17 +76,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify current password by attempting to sign in
-    const { data: verifyData, error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
-      email: authResult.user.email,
-      password: current_password,
-    });
+    // If current_password is provided, verify it for additional security
+    if (current_password) {
+      const { data: verifyData, error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
+        email: authResult.user.email,
+        password: current_password,
+      });
 
-    if (verifyError || !verifyData.user) {
-      return NextResponse.json(
-        { error: 'Current password is incorrect' },
-        { status: 401 }
-      );
+      if (verifyError || !verifyData.user) {
+        return NextResponse.json(
+          { error: 'Current password is incorrect' },
+          { status: 401 }
+        );
+      }
     }
 
     // Update password

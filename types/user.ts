@@ -60,8 +60,10 @@ export interface UpdateEmailRequest {
 }
 
 export interface UpdatePasswordRequest {
-  current_password: string;
+  email: string;
   new_password: string;
+  confirm_password: string;
+  current_password?: string; // Optional for backward compatibility
 }
 
 export interface ForgotPasswordRequest {

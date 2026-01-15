@@ -130,16 +130,29 @@ Updates password for logged-in user.
 **Request Body:**
 ```json
 {
-  "current_password": "oldpassword",
-  "new_password": "newpassword123"
+  "email": "user@example.com",
+  "new_password": "newpassword123",
+  "confirm_password": "newpassword123",
+  "current_password": "oldpassword"  // Optional, but recommended for security
 }
 ```
+
+**Validation:**
+- `email` must match the logged-in user's email
+- `new_password` and `confirm_password` must match
+- `new_password` must be at least 6 characters
+- `current_password` is optional but recommended for additional security
 
 **Response (200):**
 ```json
 {
   "message": "Password updated successfully"
 }
+```
+
+**Error Responses:**
+- `400` - Email mismatch, passwords don't match, or password too short
+- `401` - Unauthorized or current password incorrect (if provided)
 ```
 
 ---
