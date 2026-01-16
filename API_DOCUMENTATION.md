@@ -289,19 +289,67 @@ Gets account status.
 
 ### GET /api/dashboard/buyer
 
-Gets buyer dashboard data.
+Gets buyer dashboard data including overview cards, recent activity, and analytics.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Response (200):**
 ```json
 {
+  "user": {
+    "id": "...",
+    "email": "...",
+    "first_name": "...",
+    "last_name": "...",
+    "name": "...",
+    "phone": "...",
+    "parish": "...",
+    "role": "buyer",
+    "account_status": "active"
+  },
+  "subscription": {
+    "id": "...",
+    "status": "active",
+    "plan_type": "...",
+    "expires_at": "..."
+  } | null,
+  "overview": {
+    "active_applications": 3,
+    "properties_viewed": 12,
+    "saved_searches": 5
+  },
   "applications": [
     {
       "id": "...",
       "listing_id": "...",
       "status": "submitted" | "viewed" | "under_review" | "accepted" | "rejected",
-      "listing": { ... }
+      "listing": {
+        "id": "...",
+        "title": "...",
+        "location": "...",
+        "price": 500000,
+        ...
+      },
+      "agent": {
+        "id": "...",
+        "first_name": "...",
+        "last_name": "...",
+        "name": "...",
+        "email": "..."
+      },
+      "viewed_at": "...",
+      "created_at": "..."
+    }
+  ],
+  "recent_activity": [
+    {
+      "type": "agent_contacted" | "application_viewed" | "application_submitted",
+      "icon": "envelope" | "eye" | "document",
+      "title": "Agent contacted you",
+      "description": "Sarah Johnson responded to your Sunset Villa inquiry",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "relative_time": "2 hours ago",
+      "application_id": "..." // optional
     }
   ],
   "analytics": {
@@ -312,6 +360,16 @@ Gets buyer dashboard data.
   }
 }
 ```
+
+**Response Fields:**
+- `user`: Full user profile with first_name, last_name, etc.
+- `subscription`: Active subscription details (null if no active subscription)
+- `overview.active_applications`: Count of applications in progress (submitted, viewed, under_review)
+- `overview.properties_viewed`: Count of properties viewed in last 30 days
+- `overview.saved_searches`: Count of saved searches with active alerts
+- `recent_activity`: Chronologically sorted list of recent events (messages, application views, submissions)
+- `applications`: Full list of buyer's applications with listing and agent details
+- `analytics`: Aggregated statistics about applications
 
 ---
 
@@ -648,6 +706,212 @@ Generates a WhatsApp link for messaging.
 
 ---
 
+## Property Views Endpoints
+
+### POST /api/listings/track-view
+
+Tracks when a buyer views a property listing.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "listing_id": "..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "View tracked successfully"
+}
+```
+
+---
+
+## Saved Searches Endpoints
+
+### GET /api/saved-searches
+
+Gets all saved searches for the authenticated buyer.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response (200):**
+```json
+{
+  "saved_searches": [
+    {
+      "id": "...",
+      "buyer_id": "...",
+      "name": "Downtown Apartments",
+      "search_criteria": {
+        "location": "Downtown",
+        "min_price": 100000,
+        "max_price": 500000
+      },
+      "alerts_enabled": true,
+      "created_at": "...",
+      "updated_at": "..."
+    }
+  ]
+}
+```
+
+---
+
+### POST /api/saved-searches
+
+Creates a new saved search.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "name": "Downtown Apartments",
+  "search_criteria": {
+    "location": "Downtown",
+    "min_price": 100000,
+    "max_price": 500000
+  },
+  "alerts_enabled": true
+}
+```
+
+**Response (201):**
+```json
+{
+  "saved_search": { ... }
+}
+```
+
+---
+
+### PUT /api/saved-searches
+
+Updates an existing saved search.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "id": "...",
+  "name": "Updated Name",           // optional
+  "search_criteria": { ... },       // optional
+  "alerts_enabled": true            // optional
+}
+```
+
+**Response (200):**
+```json
+{
+  "saved_search": { ... }
+}
+```
+
+---
+
+### DELETE /api/saved-searches
+
+Deletes a saved search.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+- `id`: Saved search ID to delete
+
+**Response (200):**
+```json
+{
+  "message": "Saved search deleted successfully"
+}
+```
+
+---
+
+## Messages Endpoints
+
+### GET /api/messages
+
+Gets messages for the authenticated user (buyer or agent).
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+- `listing_id` (optional): Filter messages by listing
+- `application_id` (optional): Filter messages by application
+
+**Response (200):**
+```json
+{
+  "messages": [
+    {
+      "id": "...",
+      "buyer_id": "...",
+      "agent_id": "...",
+      "listing_id": "...",
+      "application_id": "...",
+      "message": "Hello, I'm interested...",
+      "sender_role": "buyer" | "agent",
+      "read": false,
+      "created_at": "...",
+      "buyer": { "id": "...", "first_name": "...", "last_name": "...", "name": "...", "email": "..." },
+      "agent": { "id": "...", "first_name": "...", "last_name": "...", "name": "...", "email": "..." },
+      "listing": { "id": "...", "title": "...", "location": "..." },
+      "application": { "id": "...", "status": "..." }
+    }
+  ]
+}
+```
+
+---
+
+### POST /api/messages
+
+Sends a new message between buyer and agent.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body (Buyer sending to Agent):**
+```json
+{
+  "agent_id": "...",
+  "listing_id": "...",        // optional
+  "application_id": "...",    // optional
+  "message": "Hello, I'm interested in this property..."
+}
+```
+
+**Request Body (Agent sending to Buyer):**
+```json
+{
+  "buyer_id": "...",
+  "listing_id": "...",        // optional
+  "application_id": "...",    // optional
+  "message": "Thank you for your interest..."
+}
+```
+
+**Response (201):**
+```json
+{
+  "message": {
+    "id": "...",
+    "buyer_id": "...",
+    "agent_id": "...",
+    "message": "...",
+    "sender_role": "buyer" | "agent",
+    "created_at": "...",
+    ...
+  }
+}
+```
+
+---
+
 ## Storage Endpoints
 
 ### POST /api/storage/upload
@@ -713,5 +977,8 @@ Ensure your Supabase database has the following tables:
 - `listings` (id, agent_id, title, description, price, location, status, images, documents, views, created_at, updated_at, published_at, expires_at)
 - `applications` (id, listing_id, buyer_id, agent_id, status, message, documents, created_at, updated_at, viewed_at)
 - `subscriptions` (id, user_id, status, stripe_subscription_id, stripe_customer_id, plan_type, created_at, updated_at, expires_at)
+- `property_views` (id, buyer_id, listing_id, viewed_at) - Tracks property views by buyers
+- `saved_searches` (id, buyer_id, name, search_criteria, alerts_enabled, created_at, updated_at) - Stores buyer's saved search criteria
+- `messages` (id, buyer_id, agent_id, listing_id, application_id, message, sender_role, read, created_at) - Tracks communications between buyers and agents
 
 Make sure to set up proper Row-Level Security (RLS) policies in Supabase.
