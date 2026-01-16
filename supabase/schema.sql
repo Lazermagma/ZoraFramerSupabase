@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email TEXT UNIQUE NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('buyer', 'agent', 'admin')),
+    first_name TEXT,
+    last_name TEXT,
     name TEXT,
     phone TEXT,
     parish TEXT,
@@ -22,6 +24,24 @@ CREATE TABLE IF NOT EXISTS public.users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Add first_name and last_name columns if they don't exist (for existing databases)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'users' 
+                   AND column_name = 'first_name') THEN
+        ALTER TABLE public.users ADD COLUMN first_name TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'users' 
+                   AND column_name = 'last_name') THEN
+        ALTER TABLE public.users ADD COLUMN last_name TEXT;
+    END IF;
+END $$;
 
 -- Create index on email for faster lookups
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
