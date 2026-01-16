@@ -22,6 +22,9 @@ export interface AuthResult {
 /**
  * Extracts and validates Bearer token from Authorization header
  * Returns user information if token is valid
+ * 
+ * Note: This function validates tokens. If a token is expired, the client
+ * should use the refresh token endpoint to get a new access token.
  */
 export async function authenticateRequest(authHeader: string | null): Promise<AuthResult> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -39,7 +42,7 @@ export async function authenticateRequest(authHeader: string | null): Promise<Au
     if (!user) {
       return {
         success: false,
-        error: 'Invalid or expired token'
+        error: 'Invalid or expired token. Please refresh your session.'
       };
     }
 

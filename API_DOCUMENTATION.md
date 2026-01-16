@@ -17,6 +17,12 @@ Authorization: Bearer <supabase_access_token>
 
 Get the access token from Supabase auth session in Framer.
 
+**Important Notes:**
+- **Access tokens expire after 1 hour** (Supabase default)
+- **Refresh tokens are long-lived** and should be stored securely
+- When an access token expires, use `/api/auth/refresh` with the refresh token to get a new access token
+- Always check token expiration before making API calls and refresh proactively
+
 ---
 
 ## Authentication Endpoints
@@ -118,6 +124,36 @@ Resets password using token from email.
   "message": "Password reset successfully"
 }
 ```
+
+---
+
+### POST /api/auth/refresh
+
+Refreshes an expired access token using a refresh token.
+
+**Request Body:**
+```json
+{
+  "refresh_token": "refresh_token_from_session"
+}
+```
+
+**Response (200):**
+```json
+{
+  "session": {
+    "access_token": "new_access_token",
+    "refresh_token": "new_refresh_token",
+    "expires_at": 1234567890
+  }
+}
+```
+
+**Error Responses:**
+- `400` - Missing refresh_token
+- `401` - Invalid or expired refresh token
+
+**Note:** Access tokens expire after 1 hour. Use this endpoint to get a new access token before it expires. The refresh token is long-lived and should be stored securely.
 
 ---
 

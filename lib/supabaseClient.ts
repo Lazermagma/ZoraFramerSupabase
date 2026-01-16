@@ -19,12 +19,23 @@ export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 /**
  * Validates a Supabase access token from Framer
  * Returns the user session if valid, null otherwise
+ * 
+ * Note: This will return null if the token is expired.
+ * Clients should use the refresh token endpoint to get a new access token.
  */
 export async function validateSession(accessToken: string) {
   try {
     const { data: { user }, error } = await supabaseClient.auth.getUser(accessToken);
     
-    if (error || !user) {
+    if (error) {
+      // Log the specific error for debugging
+      if (error.message?.includes('expired') || error.message?.includes('JWT')) {
+        console.log('Token validation failed:', error.message);
+      }
+      return null;
+    }
+
+    if (!user) {
       return null;
     }
 
