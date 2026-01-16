@@ -11,6 +11,8 @@
 
 export type ListingStatus = 'draft' | 'pending_review' | 'approved' | 'rejected' | 'archived';
 
+export type PropertyType = 'Buy' | 'Rent';
+
 export interface Listing {
   id: string;
   agent_id: string;
@@ -18,6 +20,7 @@ export interface Listing {
   description: string;
   price: number;
   location: string;
+  property_type?: PropertyType;
   status: ListingStatus;
   images?: string[];
   documents?: string[];
@@ -33,6 +36,7 @@ export interface CreateListingRequest {
   description: string;
   price: number;
   location: string;
+  property_type?: PropertyType;
   images?: string[];
   documents?: string[];
   status?: 'draft' | 'pending_review';
@@ -44,6 +48,7 @@ export interface UpdateListingRequest {
   description?: string;
   price?: number;
   location?: string;
+  property_type?: PropertyType;
   images?: string[];
   documents?: string[];
   status?: ListingStatus;

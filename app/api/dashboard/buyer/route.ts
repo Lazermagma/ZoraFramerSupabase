@@ -235,6 +235,58 @@ export async function GET(request: NextRequest) {
     const acceptedApplications = applications?.filter(a => a.status === 'accepted').length || 0;
     const rejectedApplications = applications?.filter(a => a.status === 'rejected').length || 0;
 
+    // Format applications for UI display
+    const formattedApplications = (applications || []).map((app: any) => {
+      const listing = app.listing || {};
+      const agent = app.agent || {};
+      
+      // Build property name: "Title, Location"
+      const propertyName = listing.title && listing.location
+        ? `${listing.title}, ${listing.location}`
+        : listing.title || listing.location || 'Unknown Property';
+      
+      // Get property type (Buy/Rent) or default to null
+      const propertyType = listing.property_type || null;
+      
+      // Build agent name: "First Last" or fallback to name
+      const agentName = agent.first_name && agent.last_name
+        ? `${agent.first_name} ${agent.last_name}`
+        : agent.name || 'Unknown Agent';
+      
+      // Map status to display format
+      const statusMap: Record<string, string> = {
+        'submitted': 'Submitted',
+        'viewed': 'Viewed',
+        'under_review': 'Contacted',
+        'accepted': 'Accepted',
+        'rejected': 'Rejected'
+      };
+      const displayStatus = statusMap[app.status] || app.status;
+      
+      // Format date applied: "Jan 5, 2026"
+      const dateApplied = formatDate(app.created_at);
+      
+      return {
+        id: app.id,
+        listing_id: app.listing_id,
+        application_id: app.id, // For messaging action
+        agent_id: app.agent_id, // For messaging action
+        property_name: propertyName,
+        property_type: propertyType,
+        agent_name: agentName,
+        status: app.status, // Keep original status for filtering
+        display_status: displayStatus, // Formatted status for UI
+        date_applied: dateApplied,
+        created_at: app.created_at, // Keep ISO format for sorting
+        // Include full data for backward compatibility
+        listing: listing,
+        agent: agent,
+        message: app.message,
+        documents: app.documents,
+        viewed_at: app.viewed_at,
+      };
+    });
+
     return NextResponse.json({
       user: userProfile || null,
       subscription: subscription || null,
@@ -243,7 +295,7 @@ export async function GET(request: NextRequest) {
         properties_viewed: propertiesViewed,
         saved_searches: savedSearches.length,
       },
-      applications: applications || [],
+      applications: formattedApplications,
       recent_activity: topRecentActivity,
       analytics: {
         total_applications: totalApplications,
@@ -280,4 +332,14 @@ function getRelativeTime(timestamp: string): string {
   
   const diffMonths = Math.floor(diffDays / 30);
   return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+}
+
+// Helper function to format date as "Jan 5, 2026"
+function formatDate(timestamp: string): string {
+  const date = new Date(timestamp);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
 }

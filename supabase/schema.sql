@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS public.listings (
     description TEXT NOT NULL,
     price NUMERIC(12, 2) NOT NULL CHECK (price > 0),
     location TEXT NOT NULL,
+    property_type TEXT CHECK (property_type IN ('Buy', 'Rent')),
     status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'pending_review', 'approved', 'rejected', 'archived')),
     images TEXT[] DEFAULT '{}',
     documents TEXT[] DEFAULT '{}',
@@ -67,6 +68,17 @@ CREATE TABLE IF NOT EXISTS public.listings (
     published_at TIMESTAMPTZ,
     expires_at TIMESTAMPTZ
 );
+
+-- Add property_type column if it doesn't exist (for existing databases)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'listings' 
+                   AND column_name = 'property_type') THEN
+        ALTER TABLE public.listings ADD COLUMN property_type TEXT CHECK (property_type IN ('Buy', 'Rent'));
+    END IF;
+END $$;
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_listings_agent_id ON public.listings(agent_id);

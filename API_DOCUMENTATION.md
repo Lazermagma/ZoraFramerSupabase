@@ -322,11 +322,23 @@ Gets buyer dashboard data including overview cards, recent activity, and analyti
     {
       "id": "...",
       "listing_id": "...",
+      "application_id": "...",
+      "agent_id": "...",
+      "property_name": "Sunset Villa, Los Angeles",
+      "property_type": "Buy" | "Rent" | null,
+      "agent_name": "Sarah Johnson",
       "status": "submitted" | "viewed" | "under_review" | "accepted" | "rejected",
+      "display_status": "Submitted" | "Viewed" | "Contacted" | "Accepted" | "Rejected",
+      "date_applied": "Jan 5, 2026",
+      "created_at": "2026-01-05T10:30:00Z",
+      "viewed_at": "...",
+      "message": "...",
+      "documents": [...],
       "listing": {
         "id": "...",
         "title": "...",
         "location": "...",
+        "property_type": "Buy" | "Rent",
         "price": 500000,
         ...
       },
@@ -336,9 +348,7 @@ Gets buyer dashboard data including overview cards, recent activity, and analyti
         "last_name": "...",
         "name": "...",
         "email": "..."
-      },
-      "viewed_at": "...",
-      "created_at": "..."
+      }
     }
   ],
   "recent_activity": [
@@ -368,7 +378,15 @@ Gets buyer dashboard data including overview cards, recent activity, and analyti
 - `overview.properties_viewed`: Count of properties viewed in last 30 days
 - `overview.saved_searches`: Count of saved searches with active alerts
 - `recent_activity`: Chronologically sorted list of recent events (messages, application views, submissions)
-- `applications`: Full list of buyer's applications with listing and agent details
+- `applications`: Array of formatted application objects with:
+  - `property_name`: Formatted as "Title, Location" (e.g., "Sunset Villa, Los Angeles")
+  - `property_type`: "Buy" or "Rent" (from listing)
+  - `agent_name`: Full name formatted as "First Last"
+  - `status`: Original status value (submitted, viewed, under_review, accepted, rejected)
+  - `display_status`: Formatted status for UI display (Submitted, Viewed, Contacted, Accepted, Rejected)
+  - `date_applied`: Formatted date string (e.g., "Jan 5, 2026")
+  - `application_id` and `agent_id`: For messaging actions
+  - Full `listing` and `agent` objects included for backward compatibility
 - `analytics`: Aggregated statistics about applications
 
 ---
