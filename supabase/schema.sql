@@ -3,6 +3,14 @@
 -- ============================================
 -- Run this SQL in your Supabase SQL Editor
 -- This creates all required tables, RLS policies, and indexes
+-- 
+-- SAFE FOR EXISTING DATABASES:
+-- - Uses CREATE TABLE IF NOT EXISTS (won't recreate existing tables)
+-- - Uses CREATE INDEX IF NOT EXISTS (won't duplicate indexes)
+-- - Uses DROP POLICY IF EXISTS before creating policies (prevents conflicts)
+-- - Uses DROP TRIGGER IF EXISTS before creating triggers (prevents conflicts)
+-- - Uses DO $$ blocks to add columns only if they don't exist (migration-safe)
+-- - Uses CREATE OR REPLACE FUNCTION (updates functions safely)
 -- ============================================
 
 -- Enable necessary extensions
@@ -163,16 +171,19 @@ ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 -- ============================================
 
 -- Users can read their own profile
+DROP POLICY IF EXISTS "Users can read own profile" ON public.users;
 CREATE POLICY "Users can read own profile"
     ON public.users FOR SELECT
     USING (auth.uid() = id);
 
 -- Users can update their own profile
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 CREATE POLICY "Users can update own profile"
     ON public.users FOR UPDATE
     USING (auth.uid() = id);
 
 -- Service role can do everything (for API)
+DROP POLICY IF EXISTS "Service role full access" ON public.users;
 CREATE POLICY "Service role full access"
     ON public.users FOR ALL
     USING (auth.role() = 'service_role');
@@ -182,11 +193,13 @@ CREATE POLICY "Service role full access"
 -- ============================================
 
 -- Users can read their own subscriptions
+DROP POLICY IF EXISTS "Users can read own subscriptions" ON public.subscriptions;
 CREATE POLICY "Users can read own subscriptions"
     ON public.subscriptions FOR SELECT
     USING (auth.uid() = user_id);
 
 -- Service role can do everything (for API)
+DROP POLICY IF EXISTS "Service role full access subscriptions" ON public.subscriptions;
 CREATE POLICY "Service role full access subscriptions"
     ON public.subscriptions FOR ALL
     USING (auth.role() = 'service_role');
@@ -196,26 +209,31 @@ CREATE POLICY "Service role full access subscriptions"
 -- ============================================
 
 -- Anyone can read approved listings (public browsing)
+DROP POLICY IF EXISTS "Anyone can read approved listings" ON public.listings;
 CREATE POLICY "Anyone can read approved listings"
     ON public.listings FOR SELECT
     USING (status = 'approved');
 
 -- Agents can read their own listings
+DROP POLICY IF EXISTS "Agents can read own listings" ON public.listings;
 CREATE POLICY "Agents can read own listings"
     ON public.listings FOR SELECT
     USING (auth.uid() = agent_id);
 
 -- Agents can create their own listings
+DROP POLICY IF EXISTS "Agents can create own listings" ON public.listings;
 CREATE POLICY "Agents can create own listings"
     ON public.listings FOR INSERT
     WITH CHECK (auth.uid() = agent_id);
 
 -- Agents can update their own listings
+DROP POLICY IF EXISTS "Agents can update own listings" ON public.listings;
 CREATE POLICY "Agents can update own listings"
     ON public.listings FOR UPDATE
     USING (auth.uid() = agent_id);
 
 -- Service role can do everything (for API admin operations)
+DROP POLICY IF EXISTS "Service role full access listings" ON public.listings;
 CREATE POLICY "Service role full access listings"
     ON public.listings FOR ALL
     USING (auth.role() = 'service_role');
@@ -225,26 +243,31 @@ CREATE POLICY "Service role full access listings"
 -- ============================================
 
 -- Buyers can read their own applications
+DROP POLICY IF EXISTS "Buyers can read own applications" ON public.applications;
 CREATE POLICY "Buyers can read own applications"
     ON public.applications FOR SELECT
     USING (auth.uid() = buyer_id);
 
 -- Agents can read applications for their listings
+DROP POLICY IF EXISTS "Agents can read applications for own listings" ON public.applications;
 CREATE POLICY "Agents can read applications for own listings"
     ON public.applications FOR SELECT
     USING (auth.uid() = agent_id);
 
 -- Buyers can create applications
+DROP POLICY IF EXISTS "Buyers can create applications" ON public.applications;
 CREATE POLICY "Buyers can create applications"
     ON public.applications FOR INSERT
     WITH CHECK (auth.uid() = buyer_id);
 
 -- Agents can update applications for their listings
+DROP POLICY IF EXISTS "Agents can update applications for own listings" ON public.applications;
 CREATE POLICY "Agents can update applications for own listings"
     ON public.applications FOR UPDATE
     USING (auth.uid() = agent_id);
 
 -- Service role can do everything (for API)
+DROP POLICY IF EXISTS "Service role full access applications" ON public.applications;
 CREATE POLICY "Service role full access applications"
     ON public.applications FOR ALL
     USING (auth.role() = 'service_role');
@@ -263,15 +286,19 @@ END;
 $$ language 'plpgsql';
 
 -- Triggers to auto-update updated_at
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_subscriptions_updated_at ON public.subscriptions;
 CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON public.subscriptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_listings_updated_at ON public.listings;
 CREATE TRIGGER update_listings_updated_at BEFORE UPDATE ON public.listings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_applications_updated_at ON public.applications;
 CREATE TRIGGER update_applications_updated_at BEFORE UPDATE ON public.applications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -425,48 +452,59 @@ ALTER TABLE public.saved_searches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
 -- Property Views RLS
+DROP POLICY IF EXISTS "Buyers can read own property views" ON public.property_views;
 CREATE POLICY "Buyers can read own property views"
     ON public.property_views FOR SELECT
     USING (auth.uid() = buyer_id);
 
+DROP POLICY IF EXISTS "Buyers can create own property views" ON public.property_views;
 CREATE POLICY "Buyers can create own property views"
     ON public.property_views FOR INSERT
     WITH CHECK (auth.uid() = buyer_id);
 
+DROP POLICY IF EXISTS "Service role full access property views" ON public.property_views;
 CREATE POLICY "Service role full access property views"
     ON public.property_views FOR ALL
     USING (auth.role() = 'service_role');
 
 -- Saved Searches RLS
+DROP POLICY IF EXISTS "Buyers can read own saved searches" ON public.saved_searches;
 CREATE POLICY "Buyers can read own saved searches"
     ON public.saved_searches FOR SELECT
     USING (auth.uid() = buyer_id);
 
+DROP POLICY IF EXISTS "Buyers can manage own saved searches" ON public.saved_searches;
 CREATE POLICY "Buyers can manage own saved searches"
     ON public.saved_searches FOR ALL
     USING (auth.uid() = buyer_id);
 
+DROP POLICY IF EXISTS "Service role full access saved searches" ON public.saved_searches;
 CREATE POLICY "Service role full access saved searches"
     ON public.saved_searches FOR ALL
     USING (auth.role() = 'service_role');
 
 -- Messages RLS
+DROP POLICY IF EXISTS "Buyers can read own messages" ON public.messages;
 CREATE POLICY "Buyers can read own messages"
     ON public.messages FOR SELECT
     USING (auth.uid() = buyer_id);
 
+DROP POLICY IF EXISTS "Agents can read own messages" ON public.messages;
 CREATE POLICY "Agents can read own messages"
     ON public.messages FOR SELECT
     USING (auth.uid() = agent_id);
 
+DROP POLICY IF EXISTS "Buyers can create messages" ON public.messages;
 CREATE POLICY "Buyers can create messages"
     ON public.messages FOR INSERT
     WITH CHECK (auth.uid() = buyer_id);
 
+DROP POLICY IF EXISTS "Agents can create messages" ON public.messages;
 CREATE POLICY "Agents can create messages"
     ON public.messages FOR INSERT
     WITH CHECK (auth.uid() = agent_id);
 
+DROP POLICY IF EXISTS "Service role full access messages" ON public.messages;
 CREATE POLICY "Service role full access messages"
     ON public.messages FOR ALL
     USING (auth.role() = 'service_role');
@@ -475,6 +513,7 @@ CREATE POLICY "Service role full access messages"
 -- TRIGGERS FOR NEW TABLES
 -- ============================================
 
+DROP TRIGGER IF EXISTS update_saved_searches_updated_at ON public.saved_searches;
 CREATE TRIGGER update_saved_searches_updated_at BEFORE UPDATE ON public.saved_searches
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
