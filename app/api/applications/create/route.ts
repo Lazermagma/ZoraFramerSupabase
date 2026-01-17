@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
       );
     }
     const { 
-      listing_id, 
+      listing_id,
+      property_id,  // Alternative field name
+      property,     // Alternative field name
       message,
       // Form field names
       application_type,
@@ -86,6 +88,9 @@ export async function POST(request: NextRequest) {
       declaration_actively_looking
     } = body;
 
+    // Support alternative field names for listing_id
+    const finalListingId = listing_id || property_id || property;
+
     // Map form fields to database columns
     const mappedEmploymentStatus = employment_status_direct || employment_status;
     const mappedMonthlyIncome = monthly_income_range || monthly_income;
@@ -116,9 +121,18 @@ export async function POST(request: NextRequest) {
       documentsArray.push(job_letter);
     }
 
-    if (!listing_id) {
+    // Validate required field
+    if (!finalListingId) {
+      // Log received body keys for debugging
+      const receivedKeys = Object.keys(body || {});
+      console.error('Missing listing_id. Received fields:', receivedKeys);
+      
       return NextResponse.json(
-        { error: 'Missing required field: listing_id' },
+        { 
+          error: 'Missing required field: listing_id',
+          received_fields: receivedKeys.length > 0 ? receivedKeys : 'No fields received',
+          hint: 'Make sure to include "listing_id" (or "property_id" or "property") in your request body'
+        },
         { status: 400 }
       );
     }
@@ -127,7 +141,7 @@ export async function POST(request: NextRequest) {
     const { data: listing, error: listingError } = await supabaseAdmin
       .from('listings')
       .select('id, agent_id, status')
-      .eq('id', listing_id)
+      .eq('id', finalListingId)
       .single();
 
     if (listingError || !listing) {
@@ -189,7 +203,7 @@ export async function POST(request: NextRequest) {
     const { data: existingApp, error: checkError } = await supabaseAdmin
       .from('applications')
       .select('id')
-      .eq('listing_id', listing_id)
+      .eq('listing_id', finalListingId)
       .eq('buyer_id', user.id)
       .single();
 
@@ -209,7 +223,7 @@ export async function POST(request: NextRequest) {
     const { data: application, error: appError } = await supabaseAdmin
       .from('applications')
       .insert({
-        listing_id,
+        listing_id: finalListingId,
         buyer_id: user.id,
         agent_id: listing.agent_id,
         status: 'submitted',

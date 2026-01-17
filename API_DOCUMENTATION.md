@@ -576,7 +576,7 @@ The API accepts both form field names (from frontend) and direct database field 
 **Form Field Names (from frontend):**
 ```json
 {
-  "listing_id": "...",  // required
+  "listing_id": "...",  // required (can also use "property_id" or "property")
   "message": "I'm interested...",  // optional
   "application_type": "Rent" | "Buy",  // optional - determines which budget field to use
   "property_type": "Property Seeker (Buyer/ Renter)",  // optional - metadata only
@@ -647,6 +647,7 @@ The API accepts both form field names (from frontend) and direct database field 
 ```
 
 **Field Mappings:**
+- `listing_id` (required) - Can also use `property_id` or `property` as alternative field names
 - `country` → `users.country_of_residence` (updates user profile)
 - `monthly_income` → `applications.monthly_income_range`
 - `purchase_budget` → `applications.purchase_budget_range`
@@ -657,11 +658,42 @@ The API accepts both form field names (from frontend) and direct database field 
 - `checkbox2` → `applications.declaration_prepared_to_provide_docs`
 - `checkbox3` → `applications.declaration_actively_looking`
 
+**Postman Testing Example:**
+```json
+POST https://your-api.vercel.app/api/applications/create
+Headers:
+  Authorization: Bearer <your_access_token>
+  Content-Type: application/json
+
+Body (raw JSON):
+{
+  "listing_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "message": "I'm interested in this property",
+  "application_type": "Rent",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "0123456789",
+  "country": "Jamaica",
+  "parish": "Kingston",
+  "employment_status": "Employed",
+  "monthly_income": "J$160,000-J$200,000",
+  "budget_range": "J$90,000–J$150,000",
+  "intended_income": "Immediately",
+  "government_approved": "background cloud.jpg",
+  "job_letter": "background cloud.jpg",
+  "checkbox1": true,
+  "checkbox2": true,
+  "checkbox3": true
+}
+```
+
 **Notes:** 
+- `listing_id` is **required**. You can also use `property_id` or `property` as alternative field names.
 - All financial, employment, and declaration fields are optional. The form can be submitted with just `listing_id` and `message` if needed.
 - `documents` field accepts URLs to uploaded files. Supported file types: images (JPG, PNG, etc.), PDFs, and other document formats. Files should be uploaded to Supabase Storage first, then the URLs should be included in the application.
 - User profile fields (`first_name`, `last_name`, `phone`, `country`, `parish`) will automatically update the user's profile if provided.
 - If `application_type` is "Buy", `purchase_budget` is used and `budget_range` is ignored. If "Rent", `budget_range` is used and `purchase_budget` is ignored.
+- If you get "Missing required field: listing_id" error, check that you're sending the field in the request body. The error response will show which fields were received to help debug.
 
 ---
 

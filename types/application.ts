@@ -35,7 +35,9 @@ export interface Application {
 }
 
 export interface CreateApplicationRequest {
-  listing_id: string;
+  listing_id?: string; // Required - can also use property_id or property
+  property_id?: string; // Alternative to listing_id
+  property?: string; // Alternative to listing_id
   message?: string;
   documents?: string[];
   // Form field names (from frontend)
