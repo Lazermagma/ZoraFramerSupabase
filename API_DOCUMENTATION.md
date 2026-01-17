@@ -335,7 +335,7 @@ Gets buyer dashboard data including overview cards, recent activity, and analyti
       "created_at": "2026-01-05T10:30:00Z",
       "viewed_at": "...",
       "message": "...",
-      "documents": [...],
+      "documents": [...],  // Array of document URLs (images, PDFs, or other documents)
       "listing": {
         "id": "...",
         "title": "...",
@@ -438,8 +438,8 @@ Creates a new listing (Agent-only).
   "description": "Property description",
   "price": 500000,
   "location": "123 Main St, City, State",
-  "images": ["https://..."],      // optional
-  "documents": ["https://..."],   // optional
+  "images": ["https://..."],      // optional array of image URLs
+  "documents": ["https://..."],   // optional array of document URLs (PDFs, images, or other documents)
   "status": "draft" | "pending_review"  // optional, defaults to "draft"
 }
 ```
@@ -472,8 +472,8 @@ Updates an existing listing (Agent-only, must own listing).
   "description": "...",      // optional
   "price": 500000,          // optional
   "location": "...",        // optional
-  "images": [...],          // optional
-  "documents": [...],       // optional
+  "images": [...],          // optional array of image URLs
+  "documents": [...],       // optional array of document URLs (PDFs, images, or other documents)
   "status": "draft" | "pending_review" | "approved" | "rejected" | "archived"  // optional
 }
 ```
@@ -574,7 +574,7 @@ Creates a new application (Buyer-only). Includes all buyer/renter application fo
 {
   "listing_id": "...",
   "message": "I'm interested...",  // optional
-  "documents": ["https://..."],      // optional array of document URLs
+  "documents": ["https://..."],      // optional array of document URLs (images, PDFs, or other documents)
   // Financial & Employment Info
   "employment_status": "Full-time" | "Part-time" | "Self-employed" | "Unemployed" | "Student" | "Retired",  // optional
   "monthly_income_range": "$0-$1,000" | "$1,000-$3,000" | "$3,000-$5,000" | "$5,000-$10,000" | "$10,000+",  // optional
@@ -613,7 +613,9 @@ Creates a new application (Buyer-only). Includes all buyer/renter application fo
 }
 ```
 
-**Note:** All financial, employment, and declaration fields are optional. The form can be submitted with just `listing_id` and `message` if needed.
+**Note:** 
+- All financial, employment, and declaration fields are optional. The form can be submitted with just `listing_id` and `message` if needed.
+- `documents` field accepts URLs to uploaded files. Supported file types: images (JPG, PNG, etc.), PDFs, and other document formats. Files should be uploaded to Supabase Storage first, then the URLs should be included in the application.
 
 ---
 
@@ -960,12 +962,12 @@ Sends a new message between buyer and agent.
 
 ### POST /api/storage/upload
 
-Uploads documents/files to Supabase Storage.
+Uploads documents/files to Supabase Storage. Supports images (JPG, PNG, GIF, etc.), PDFs, and other document formats.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Request Body:** FormData
-- `file`: File to upload
+- `file`: File to upload (images, PDFs, or documents)
 - `folder`: Folder name (optional, default: "uploads")
 
 **Response (200):**
@@ -975,6 +977,8 @@ Uploads documents/files to Supabase Storage.
   "path": "folder/filename"
 }
 ```
+
+**Note:** After uploading, use the returned `url` in the `documents` array when creating applications or listings.
 
 ---
 

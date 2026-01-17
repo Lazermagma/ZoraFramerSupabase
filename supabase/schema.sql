@@ -372,7 +372,10 @@ END $$;
 -- Bucket name: "documents"
 -- Public: false (private bucket)
 -- File size limit: 10MB (adjust as needed)
--- Allowed MIME types: application/pdf, image/*, etc.
+-- Allowed MIME types: 
+--   - Images: image/jpeg, image/png, image/gif, image/webp, etc.
+--   - Documents: application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, etc.
+--   - Other: text/plain, application/json, etc.
 
 -- ============================================
 -- INITIAL ADMIN USER (Optional)
