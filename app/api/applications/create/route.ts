@@ -126,13 +126,15 @@ export async function POST(request: NextRequest) {
       console.log('No listing_id provided, auto-creating listing...');
       
       // Determine agent_id for the new listing
-      let agentIdForListing: string;
+      let agentIdForListing: string | undefined;
       
       if (user.role === 'agent') {
         // If user is an agent, use their ID
         agentIdForListing = user.id;
+        console.log('Using authenticated agent ID:', agentIdForListing);
       } else {
         // If user is a buyer, find the first available agent
+        console.log('User is buyer, searching for agents...');
         const { data: firstAgent, error: agentError } = await supabaseAdmin
           .from('users')
           .select('id')
@@ -141,6 +143,7 @@ export async function POST(request: NextRequest) {
           .single();
         
         if (agentError || !firstAgent) {
+          console.log('No agent found with .single(), trying array query...', agentError?.message);
           // If no agent found, try to find any agent (without single)
           const { data: agents } = await supabaseAdmin
             .from('users')
@@ -150,7 +153,7 @@ export async function POST(request: NextRequest) {
           
           if (!agents || agents.length === 0) {
             // No agents exist - create a system agent automatically
-            console.log('No agents found, creating system agent...');
+            console.log('No agents found in database, creating system agent...');
             
             // Check if system agent already exists (by email)
             const { data: existingSystemAgent } = await supabaseAdmin
@@ -161,7 +164,9 @@ export async function POST(request: NextRequest) {
             
             if (existingSystemAgent) {
               agentIdForListing = existingSystemAgent.id;
+              console.log('Found existing system agent:', agentIdForListing);
             } else {
+              console.log('Creating new system agent in Auth...');
               // Create system agent in Supabase Auth first
               const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
                 email: 'system@zora.property',
@@ -178,10 +183,16 @@ export async function POST(request: NextRequest) {
               if (authError || !authUser.user) {
                 console.error('Error creating system agent in auth:', authError);
                 return NextResponse.json(
-                  { error: 'Failed to create system agent. Please contact support.' },
+                  { 
+                    error: 'Failed to create system agent. Please contact support.',
+                    details: authError?.message || 'Unknown error'
+                  },
                   { status: 500 }
                 );
               }
+              
+              console.log('System agent created in Auth, ID:', authUser.user.id);
+              console.log('Creating system agent in users table...');
               
               // Create system agent in users table
               const { data: systemAgent, error: userError } = await supabaseAdmin
@@ -201,20 +212,40 @@ export async function POST(request: NextRequest) {
               if (userError || !systemAgent) {
                 console.error('Error creating system agent in users table:', userError);
                 return NextResponse.json(
-                  { error: 'Failed to create system agent. Please contact support.' },
+                  { 
+                    error: 'Failed to create system agent in database. Please contact support.',
+                    details: userError?.message || 'Unknown error'
+                  },
                   { status: 500 }
                 );
               }
               
               agentIdForListing = systemAgent.id;
-              console.log('System agent created:', agentIdForListing);
+              console.log('System agent successfully created:', agentIdForListing);
             }
           } else {
             agentIdForListing = agents[0].id;
+            console.log('Found agent from array query:', agentIdForListing);
           }
         } else {
           agentIdForListing = firstAgent.id;
+          console.log('Found agent with .single():', agentIdForListing);
         }
+      }
+
+      // Final safety check - ensure agentIdForListing is set
+      if (!agentIdForListing) {
+        console.error('CRITICAL: agentIdForListing is still undefined after all checks');
+        return NextResponse.json(
+          { 
+            error: 'Failed to determine agent for listing. Please provide a listing_id or contact support.',
+            debug: {
+              user_role: user.role,
+              user_id: user.id
+            }
+          },
+          { status: 500 }
+        );
       }
 
       // Create a minimal draft listing
