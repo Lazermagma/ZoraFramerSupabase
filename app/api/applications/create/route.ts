@@ -43,7 +43,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: CreateApplicationRequest = await request.json();
+    // Parse request body with error handling
+    let body: CreateApplicationRequest;
+    try {
+      body = await request.json();
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
     const { 
       listing_id, 
       message,
@@ -97,12 +106,13 @@ export async function POST(request: NextRequest) {
     // Build documents array from form fields
     const documentsArray: string[] = [];
     if (documents && Array.isArray(documents)) {
-      documentsArray.push(...documents);
+      // Filter out null/undefined/empty values
+      documentsArray.push(...documents.filter((doc): doc is string => Boolean(doc && typeof doc === 'string')));
     }
-    if (government_approved) {
+    if (government_approved && typeof government_approved === 'string') {
       documentsArray.push(government_approved);
     }
-    if (job_letter) {
+    if (job_letter && typeof job_letter === 'string') {
       documentsArray.push(job_letter);
     }
 
@@ -137,6 +147,13 @@ export async function POST(request: NextRequest) {
     // Update user profile if form fields are provided (non-blocking)
     if (first_name || last_name || phone || country || parish) {
       try {
+        // Fetch current user data to get existing name fields
+        const { data: currentUserData } = await supabaseAdmin
+          .from('users')
+          .select('first_name, last_name, name')
+          .eq('id', user.id)
+          .single();
+
         const userUpdateData: any = {};
         if (first_name !== undefined) userUpdateData.first_name = first_name;
         if (last_name !== undefined) userUpdateData.last_name = last_name;
@@ -146,9 +163,8 @@ export async function POST(request: NextRequest) {
         
         // Auto-generate name from first_name and last_name if not provided
         if (first_name || last_name) {
-          const currentName = user.name || '';
-          const newFirstName = first_name || user.first_name || '';
-          const newLastName = last_name || user.last_name || '';
+          const newFirstName = first_name || currentUserData?.first_name || '';
+          const newLastName = last_name || currentUserData?.last_name || '';
           if (newFirstName || newLastName) {
             userUpdateData.name = `${newFirstName} ${newLastName}`.trim();
           }
@@ -186,8 +202,8 @@ export async function POST(request: NextRequest) {
 
     // Determine budget field based on application_type
     // If application_type is "Rent", use budget_range; if "Buy", use purchase_budget_range
-    const finalBudgetRange = application_type === 'Buy' ? null : budget_range;
-    const finalPurchaseBudget = application_type === 'Buy' ? mappedPurchaseBudget : null;
+    const finalBudgetRange = application_type === 'Buy' ? null : (budget_range || null);
+    const finalPurchaseBudget = application_type === 'Buy' ? (mappedPurchaseBudget || null) : null;
 
     // Create application
     const { data: application, error: appError } = await supabaseAdmin
