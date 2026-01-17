@@ -66,7 +66,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body: UpdateProfileRequest = await request.json();
-    const { first_name, last_name, name, phone, parish } = body;
+    const { first_name, last_name, name, phone, country_of_residence, parish } = body;
 
     // Get current user data to build full name if needed
     const { data: currentUser } = await supabaseAdmin
@@ -92,6 +92,7 @@ export async function PUT(request: NextRequest) {
     }
     
     if (phone !== undefined) updateData.phone = phone;
+    if (country_of_residence !== undefined) updateData.country_of_residence = country_of_residence;
     if (parish !== undefined) updateData.parish = parish;
     updateData.updated_at = new Date().toISOString();
 

@@ -32,7 +32,7 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const body: SignUpRequest = await request.json();
-    const { email, password, role, first_name, last_name, name, phone, parish } = body;
+    const { email, password, role, first_name, last_name, name, phone, country_of_residence, parish } = body;
 
     // Validate required fields
     if (!email || !password || !role) {
@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
           last_name: last_name || '',
           name: name || (first_name && last_name ? `${first_name} ${last_name}` : '') || '',
           phone: phone || '',
+          country_of_residence: country_of_residence || '',
           parish: parish || '',
         },
       },
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
         last_name: last_name || null,
         name: fullName,
         phone: phone || null,
+        country_of_residence: country_of_residence || null,
         parish: parish || null,
         account_status: 'active',
       })

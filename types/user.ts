@@ -19,6 +19,7 @@ export interface User {
   last_name?: string;
   name?: string; // Deprecated: kept for backward compatibility
   phone?: string;
+  country_of_residence?: string;
   parish?: string;
   account_status: AccountStatus;
   created_at: string;
@@ -39,6 +40,7 @@ export interface SignUpRequest {
   last_name?: string;
   name?: string; // Deprecated: kept for backward compatibility
   phone?: string;
+  country_of_residence?: string;
   parish?: string;
 }
 
@@ -52,6 +54,7 @@ export interface UpdateProfileRequest {
   last_name?: string;
   name?: string; // Deprecated: kept for backward compatibility
   phone?: string;
+  country_of_residence?: string;
   parish?: string;
 }
 

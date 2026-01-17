@@ -19,13 +19,14 @@ CREATE TABLE IF NOT EXISTS public.users (
     last_name TEXT,
     name TEXT,
     phone TEXT,
+    country_of_residence TEXT,
     parish TEXT,
     account_status TEXT NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'inactive')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Add first_name and last_name columns if they don't exist (for existing databases)
+-- Add first_name, last_name, and country_of_residence columns if they don't exist (for existing databases)
 DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
@@ -40,6 +41,13 @@ BEGIN
                    AND table_name = 'users' 
                    AND column_name = 'last_name') THEN
         ALTER TABLE public.users ADD COLUMN last_name TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'users' 
+                   AND column_name = 'country_of_residence') THEN
+        ALTER TABLE public.users ADD COLUMN country_of_residence TEXT;
     END IF;
 END $$;
 
@@ -118,6 +126,16 @@ CREATE TABLE IF NOT EXISTS public.applications (
     status TEXT NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted', 'viewed', 'under_review', 'accepted', 'rejected')),
     message TEXT,
     documents TEXT[] DEFAULT '{}',
+    -- Financial & Employment Info
+    employment_status TEXT,
+    monthly_income_range TEXT,
+    budget_range TEXT, -- For renters
+    purchase_budget_range TEXT, -- For buyers
+    intended_move_in_timeframe TEXT,
+    -- Declarations
+    declaration_application_not_approval BOOLEAN DEFAULT false,
+    declaration_prepared_to_provide_docs BOOLEAN DEFAULT false,
+    declaration_actively_looking BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     viewed_at TIMESTAMPTZ,
@@ -256,6 +274,68 @@ CREATE TRIGGER update_listings_updated_at BEFORE UPDATE ON public.listings
 
 CREATE TRIGGER update_applications_updated_at BEFORE UPDATE ON public.applications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Add new application fields if they don't exist (for existing databases)
+DO $$ 
+BEGIN
+    -- Financial & Employment Info
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'employment_status') THEN
+        ALTER TABLE public.applications ADD COLUMN employment_status TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'monthly_income_range') THEN
+        ALTER TABLE public.applications ADD COLUMN monthly_income_range TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'budget_range') THEN
+        ALTER TABLE public.applications ADD COLUMN budget_range TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'purchase_budget_range') THEN
+        ALTER TABLE public.applications ADD COLUMN purchase_budget_range TEXT;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'intended_move_in_timeframe') THEN
+        ALTER TABLE public.applications ADD COLUMN intended_move_in_timeframe TEXT;
+    END IF;
+    
+    -- Declarations
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'declaration_application_not_approval') THEN
+        ALTER TABLE public.applications ADD COLUMN declaration_application_not_approval BOOLEAN DEFAULT false;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'declaration_prepared_to_provide_docs') THEN
+        ALTER TABLE public.applications ADD COLUMN declaration_prepared_to_provide_docs BOOLEAN DEFAULT false;
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_schema = 'public' 
+                   AND table_name = 'applications' 
+                   AND column_name = 'declaration_actively_looking') THEN
+        ALTER TABLE public.applications ADD COLUMN declaration_actively_looking BOOLEAN DEFAULT false;
+    END IF;
+END $$;
 
 -- ============================================
 -- STORAGE BUCKET SETUP

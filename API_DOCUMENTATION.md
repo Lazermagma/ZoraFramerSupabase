@@ -37,11 +37,12 @@ Creates a new user account with role selection.
   "email": "user@example.com",
   "password": "password123",
   "role": "buyer" | "agent",
-  "first_name": "John",      // optional
-  "last_name": "Doe",        // optional
-  "name": "John Doe",        // optional (deprecated, kept for backward compatibility)
-  "phone": "+1234567890",    // optional
-  "parish": "Kingston"       // optional
+  "first_name": "John",           // optional
+  "last_name": "Doe",             // optional
+  "name": "John Doe",             // optional (deprecated, kept for backward compatibility)
+  "phone": "+1234567890",         // optional
+  "country_of_residence": "Jamaica",  // optional
+  "parish": "Kingston"            // optional
 }
 ```
 
@@ -229,11 +230,12 @@ Updates user profile.
 **Request Body:**
 ```json
 {
-  "first_name": "John",      // optional
-  "last_name": "Doe",        // optional
-  "name": "New Name",        // optional (deprecated, kept for backward compatibility)
-  "phone": "+1234567890",    // optional
-  "parish": "New Parish"     // optional
+  "first_name": "John",           // optional
+  "last_name": "Doe",             // optional
+  "name": "New Name",             // optional (deprecated, kept for backward compatibility)
+  "phone": "+1234567890",         // optional
+  "country_of_residence": "Jamaica",  // optional
+  "parish": "New Parish"          // optional
 }
 ```
 
@@ -563,7 +565,7 @@ Gets all approved and visible listings (Public endpoint, no auth required).
 
 ### POST /api/applications/create
 
-Creates a new application (Buyer-only).
+Creates a new application (Buyer-only). Includes all buyer/renter application form fields.
 
 **Headers:** `Authorization: Bearer <token>`
 
@@ -572,7 +574,17 @@ Creates a new application (Buyer-only).
 {
   "listing_id": "...",
   "message": "I'm interested...",  // optional
-  "documents": ["https://..."]      // optional
+  "documents": ["https://..."],      // optional array of document URLs
+  // Financial & Employment Info
+  "employment_status": "Full-time" | "Part-time" | "Self-employed" | "Unemployed" | "Student" | "Retired",  // optional
+  "monthly_income_range": "$0-$1,000" | "$1,000-$3,000" | "$3,000-$5,000" | "$5,000-$10,000" | "$10,000+",  // optional
+  "budget_range": "$500-$1,000" | "$1,000-$2,000" | "$2,000-$3,000" | "$3,000+",  // optional (for renters)
+  "purchase_budget_range": "$50,000-$100,000" | "$100,000-$250,000" | "$250,000-$500,000" | "$500,000+",  // optional (for buyers)
+  "intended_move_in_timeframe": "Immediately" | "Within 1 month" | "1-3 months" | "3-6 months" | "6+ months",  // optional
+  // Declarations
+  "declaration_application_not_approval": true,  // optional, default: false
+  "declaration_prepared_to_provide_docs": true,  // optional, default: false
+  "declaration_actively_looking": true           // optional, default: false
 }
 ```
 
@@ -583,11 +595,25 @@ Creates a new application (Buyer-only).
     "id": "...",
     "listing_id": "...",
     "buyer_id": "...",
+    "agent_id": "...",
     "status": "submitted",
-    ...
+    "message": "...",
+    "documents": [...],
+    "employment_status": "...",
+    "monthly_income_range": "...",
+    "budget_range": "...",
+    "purchase_budget_range": "...",
+    "intended_move_in_timeframe": "...",
+    "declaration_application_not_approval": true,
+    "declaration_prepared_to_provide_docs": true,
+    "declaration_actively_looking": true,
+    "created_at": "...",
+    "updated_at": "..."
   }
 }
 ```
+
+**Note:** All financial, employment, and declaration fields are optional. The form can be submitted with just `listing_id` and `message` if needed.
 
 ---
 

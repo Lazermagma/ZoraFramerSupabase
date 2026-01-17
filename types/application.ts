@@ -19,6 +19,16 @@ export interface Application {
   status: ApplicationStatus;
   message?: string;
   documents?: string[];
+  // Financial & Employment Info
+  employment_status?: string;
+  monthly_income_range?: string;
+  budget_range?: string; // For renters
+  purchase_budget_range?: string; // For buyers
+  intended_move_in_timeframe?: string;
+  // Declarations
+  declaration_application_not_approval?: boolean;
+  declaration_prepared_to_provide_docs?: boolean;
+  declaration_actively_looking?: boolean;
   created_at: string;
   updated_at: string;
   viewed_at?: string;
@@ -28,6 +38,16 @@ export interface CreateApplicationRequest {
   listing_id: string;
   message?: string;
   documents?: string[];
+  // Financial & Employment Info
+  employment_status?: string;
+  monthly_income_range?: string;
+  budget_range?: string; // For renters
+  purchase_budget_range?: string; // For buyers
+  intended_move_in_timeframe?: string;
+  // Declarations
+  declaration_application_not_approval?: boolean;
+  declaration_prepared_to_provide_docs?: boolean;
+  declaration_actively_looking?: boolean;
 }
 
 export interface UpdateApplicationStatusRequest {

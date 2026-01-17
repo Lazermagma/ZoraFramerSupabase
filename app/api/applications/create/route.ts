@@ -44,7 +44,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body: CreateApplicationRequest = await request.json();
-    const { listing_id, message, documents } = body;
+    const { 
+      listing_id, 
+      message, 
+      documents,
+      employment_status,
+      monthly_income_range,
+      budget_range,
+      purchase_budget_range,
+      intended_move_in_timeframe,
+      declaration_application_not_approval,
+      declaration_prepared_to_provide_docs,
+      declaration_actively_looking
+    } = body;
 
     if (!listing_id) {
       return NextResponse.json(
@@ -99,6 +111,16 @@ export async function POST(request: NextRequest) {
         status: 'submitted',
         message: message || null,
         documents: documents || [],
+        // Financial & Employment Info
+        employment_status: employment_status || null,
+        monthly_income_range: monthly_income_range || null,
+        budget_range: budget_range || null,
+        purchase_budget_range: purchase_budget_range || null,
+        intended_move_in_timeframe: intended_move_in_timeframe || null,
+        // Declarations
+        declaration_application_not_approval: declaration_application_not_approval || false,
+        declaration_prepared_to_provide_docs: declaration_prepared_to_provide_docs || false,
+        declaration_actively_looking: declaration_actively_looking || false,
       })
       .select()
       .single();
