@@ -141,22 +141,77 @@ export async function POST(request: NextRequest) {
           .single();
         
         if (agentError || !firstAgent) {
-          // If no agent found, create a placeholder listing with a system agent
-          // Try to find any agent, or use a fallback
-          const { data: anyAgent } = await supabaseAdmin
+          // If no agent found, try to find any agent (without single)
+          const { data: agents } = await supabaseAdmin
             .from('users')
             .select('id')
             .eq('role', 'agent')
-            .limit(1)
-            .maybeSingle();
+            .limit(1);
           
-          if (!anyAgent) {
-            return NextResponse.json(
-              { error: 'No agent available. Please provide a listing_id or contact support.' },
-              { status: 400 }
-            );
+          if (!agents || agents.length === 0) {
+            // No agents exist - create a system agent automatically
+            console.log('No agents found, creating system agent...');
+            
+            // Check if system agent already exists (by email)
+            const { data: existingSystemAgent } = await supabaseAdmin
+              .from('users')
+              .select('id')
+              .eq('email', 'system@zora.property')
+              .maybeSingle();
+            
+            if (existingSystemAgent) {
+              agentIdForListing = existingSystemAgent.id;
+            } else {
+              // Create system agent in Supabase Auth first
+              const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+                email: 'system@zora.property',
+                password: crypto.randomUUID(), // Random password, won't be used
+                email_confirm: true,
+                user_metadata: {
+                  role: 'agent',
+                  first_name: 'System',
+                  last_name: 'Agent',
+                  name: 'System Agent'
+                }
+              });
+              
+              if (authError || !authUser.user) {
+                console.error('Error creating system agent in auth:', authError);
+                return NextResponse.json(
+                  { error: 'Failed to create system agent. Please contact support.' },
+                  { status: 500 }
+                );
+              }
+              
+              // Create system agent in users table
+              const { data: systemAgent, error: userError } = await supabaseAdmin
+                .from('users')
+                .insert({
+                  id: authUser.user.id,
+                  email: 'system@zora.property',
+                  role: 'agent',
+                  first_name: 'System',
+                  last_name: 'Agent',
+                  name: 'System Agent',
+                  account_status: 'active'
+                })
+                .select('id')
+                .single();
+              
+              if (userError || !systemAgent) {
+                console.error('Error creating system agent in users table:', userError);
+                return NextResponse.json(
+                  { error: 'Failed to create system agent. Please contact support.' },
+                  { status: 500 }
+                );
+              }
+              
+              agentIdForListing = systemAgent.id;
+              console.log('System agent created:', agentIdForListing);
+            }
+          } else {
+            agentIdForListing = agents[0].id;
           }
-          agentIdForListing = anyAgent.id;
         } else {
           agentIdForListing = firstAgent.id;
         }
