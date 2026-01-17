@@ -394,6 +394,17 @@ VALUES (
 */
 
 -- ============================================
+-- SYSTEM AGENT (Auto-created by API)
+-- ============================================
+-- Note: The system agent is automatically created by the API when needed
+-- (when creating applications without listing_id and no agents exist).
+-- Email: system@zora.property
+-- Role: agent
+-- This agent is created programmatically via Supabase Admin API, not through SQL,
+-- because it requires creating both an Auth user and a database user record.
+-- The API endpoint /api/applications/create handles this automatically.
+
+-- ============================================
 -- PROPERTY VIEWS TABLE
 -- ============================================
 -- Tracks which properties a buyer has viewed
