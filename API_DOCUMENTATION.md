@@ -570,21 +570,54 @@ Creates a new application (Buyer-only). Includes all buyer/renter application fo
 **Headers:** `Authorization: Bearer <token>`
 
 **Request Body:**
+
+The API accepts both form field names (from frontend) and direct database field names. Form field names are automatically mapped to database columns.
+
+**Form Field Names (from frontend):**
+```json
+{
+  "listing_id": "...",  // required
+  "message": "I'm interested...",  // optional
+  "application_type": "Rent" | "Buy",  // optional - determines which budget field to use
+  "property_type": "Property Seeker (Buyer/ Renter)",  // optional - metadata only
+  // User Profile Fields (will update user profile if provided)
+  "first_name": "John",  // optional
+  "last_name": "Doe",  // optional
+  "email": "user@example.com",  // optional
+  "phone": "0123456789",  // optional
+  "country": "Jamaica",  // optional - maps to country_of_residence
+  "parish": "Kingston",  // optional
+  // Financial & Employment Info
+  "employment_status": "Employed" | "Full-time" | "Part-time" | "Self-employed" | "Unemployed" | "Student" | "Retired",  // optional
+  "monthly_income": "J$160,000-J$200,000",  // optional - maps to monthly_income_range
+  "budget_range": "J$90,000–J$150,000",  // optional (for renters when application_type is "Rent")
+  "purchase_budget": "J$20M–J$40M",  // optional (for buyers when application_type is "Buy") - maps to purchase_budget_range
+  "intended_income": "Immediately" | "Within 1 month" | "1-3 months" | "3-6 months" | "6+ months",  // optional - maps to intended_move_in_timeframe
+  // Documents (can be filenames or URLs)
+  "government_approved": "background cloud.jpg" | "https://...",  // optional - added to documents array
+  "job_letter": "background cloud.jpg" | "https://...",  // optional - added to documents array
+  "documents": ["https://..."],  // optional array of document URLs (images, PDFs, or other documents)
+  // Declarations (checkboxes)
+  "checkbox1": true,  // optional - maps to declaration_application_not_approval
+  "checkbox2": true,  // optional - maps to declaration_prepared_to_provide_docs
+  "checkbox3": true   // optional - maps to declaration_actively_looking
+}
+```
+
+**Direct Database Field Names (for backward compatibility):**
 ```json
 {
   "listing_id": "...",
-  "message": "I'm interested...",  // optional
-  "documents": ["https://..."],      // optional array of document URLs (images, PDFs, or other documents)
-  // Financial & Employment Info
-  "employment_status": "Full-time" | "Part-time" | "Self-employed" | "Unemployed" | "Student" | "Retired",  // optional
-  "monthly_income_range": "$0-$1,000" | "$1,000-$3,000" | "$3,000-$5,000" | "$5,000-$10,000" | "$10,000+",  // optional
-  "budget_range": "$500-$1,000" | "$1,000-$2,000" | "$2,000-$3,000" | "$3,000+",  // optional (for renters)
-  "purchase_budget_range": "$50,000-$100,000" | "$100,000-$250,000" | "$250,000-$500,000" | "$500,000+",  // optional (for buyers)
-  "intended_move_in_timeframe": "Immediately" | "Within 1 month" | "1-3 months" | "3-6 months" | "6+ months",  // optional
-  // Declarations
-  "declaration_application_not_approval": true,  // optional, default: false
-  "declaration_prepared_to_provide_docs": true,  // optional, default: false
-  "declaration_actively_looking": true           // optional, default: false
+  "message": "...",
+  "documents": ["https://..."],
+  "employment_status": "...",
+  "monthly_income_range": "...",
+  "budget_range": "...",
+  "purchase_budget_range": "...",
+  "intended_move_in_timeframe": "...",
+  "declaration_application_not_approval": true,
+  "declaration_prepared_to_provide_docs": true,
+  "declaration_actively_looking": true
 }
 ```
 
@@ -613,9 +646,22 @@ Creates a new application (Buyer-only). Includes all buyer/renter application fo
 }
 ```
 
-**Note:** 
+**Field Mappings:**
+- `country` → `users.country_of_residence` (updates user profile)
+- `monthly_income` → `applications.monthly_income_range`
+- `purchase_budget` → `applications.purchase_budget_range`
+- `intended_income` → `applications.intended_move_in_timeframe`
+- `government_approved` → Added to `applications.documents` array
+- `job_letter` → Added to `applications.documents` array
+- `checkbox1` → `applications.declaration_application_not_approval`
+- `checkbox2` → `applications.declaration_prepared_to_provide_docs`
+- `checkbox3` → `applications.declaration_actively_looking`
+
+**Notes:** 
 - All financial, employment, and declaration fields are optional. The form can be submitted with just `listing_id` and `message` if needed.
 - `documents` field accepts URLs to uploaded files. Supported file types: images (JPG, PNG, etc.), PDFs, and other document formats. Files should be uploaded to Supabase Storage first, then the URLs should be included in the application.
+- User profile fields (`first_name`, `last_name`, `phone`, `country`, `parish`) will automatically update the user's profile if provided.
+- If `application_type` is "Buy", `purchase_budget` is used and `budget_range` is ignored. If "Rent", `budget_range` is used and `purchase_budget` is ignored.
 
 ---
 
