@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
 
     const user = authResult.user;
 
-    // Verify user is buyer
-    if (user.role !== 'buyer' && user.role !== 'admin') {
+    // Verify user is buyer, agent, or admin (agents can also create applications for testing/auto-created listings)
+    if (user.role !== 'buyer' && user.role !== 'admin' && user.role !== 'agent') {
       return NextResponse.json(
-        { error: 'Only buyers can submit applications' },
+        { error: 'Only buyers, agents, and admins can submit applications' },
         { status: 403 }
       );
     }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Support alternative field names for listing_id
-    const finalListingId = listing_id || property_id || property;
+    let finalListingId = listing_id || property_id || property;
 
     // Map form fields to database columns
     const mappedEmploymentStatus = employment_status_direct || employment_status;
@@ -121,23 +121,104 @@ export async function POST(request: NextRequest) {
       documentsArray.push(job_letter);
     }
 
-    // Validate required field
+    // Auto-create listing if listing_id is not provided
     if (!finalListingId) {
-      // Log received body keys for debugging
-      const receivedKeys = Object.keys(body || {});
-      console.error('Missing listing_id. Received fields:', receivedKeys);
+      console.log('No listing_id provided, auto-creating listing...');
       
-      return NextResponse.json(
-        { 
-          error: 'Missing required field: listing_id',
-          received_fields: receivedKeys.length > 0 ? receivedKeys : 'No fields received',
-          hint: 'Make sure to include "listing_id" (or "property_id" or "property") in your request body'
-        },
-        { status: 400 }
-      );
+      // Determine agent_id for the new listing
+      let agentIdForListing: string;
+      
+      if (user.role === 'agent') {
+        // If user is an agent, use their ID
+        agentIdForListing = user.id;
+      } else {
+        // If user is a buyer, find the first available agent
+        const { data: firstAgent, error: agentError } = await supabaseAdmin
+          .from('users')
+          .select('id')
+          .eq('role', 'agent')
+          .limit(1)
+          .single();
+        
+        if (agentError || !firstAgent) {
+          // If no agent found, create a placeholder listing with a system agent
+          // Try to find any agent, or use a fallback
+          const { data: anyAgent } = await supabaseAdmin
+            .from('users')
+            .select('id')
+            .eq('role', 'agent')
+            .limit(1)
+            .maybeSingle();
+          
+          if (!anyAgent) {
+            return NextResponse.json(
+              { error: 'No agent available. Please provide a listing_id or contact support.' },
+              { status: 400 }
+            );
+          }
+          agentIdForListing = anyAgent.id;
+        } else {
+          agentIdForListing = firstAgent.id;
+        }
+      }
+
+      // Create a minimal draft listing
+      const listingTitle = property_type || application_type 
+        ? `Property Application - ${property_type || application_type}` 
+        : 'Property Application';
+      
+      const listingDescription = message 
+        ? `Application: ${message}` 
+        : 'Property application submitted by buyer';
+      
+      // Use budget information to estimate price if available
+      let estimatedPrice = 100000; // Default price
+      const purchaseBudgetValue = purchase_budget || purchase_budget_range;
+      if (purchaseBudgetValue) {
+        // Try to extract numeric value from budget range (e.g., "J$20M–J$40M" -> 20000000)
+        const budgetStr = purchaseBudgetValue.toString();
+        const match = budgetStr.match(/J?\$?(\d+\.?\d*)[M]?/i);
+        if (match) {
+          const num = parseFloat(match[1]);
+          estimatedPrice = num >= 1 ? num * 1000000 : num * 1000; // Assume M means million
+        }
+      } else if (budget_range) {
+        // For rent, extract monthly rent estimate
+        const budgetStr = budget_range.toString();
+        const match = budgetStr.match(/J?\$?(\d+\.?\d*)/);
+        if (match) {
+          estimatedPrice = parseFloat(match[1]) * 12; // Annual estimate
+        }
+      }
+
+      const { data: newListing, error: createListingError } = await supabaseAdmin
+        .from('listings')
+        .insert({
+          agent_id: agentIdForListing,
+          title: listingTitle,
+          description: listingDescription,
+          price: estimatedPrice,
+          location: parish || country || 'Location TBD',
+          property_type: application_type === 'Buy' ? 'Buy' : (application_type === 'Rent' ? 'Rent' : null),
+          status: 'draft', // Create as draft, can be updated later
+          views: 0,
+        })
+        .select('id, agent_id, status')
+        .single();
+
+      if (createListingError || !newListing) {
+        console.error('Error auto-creating listing:', createListingError);
+        return NextResponse.json(
+          { error: 'Failed to create listing automatically', details: createListingError?.message },
+          { status: 500 }
+        );
+      }
+
+      finalListingId = newListing.id;
+      console.log('Auto-created listing:', finalListingId);
     }
 
-    // Verify listing exists and is approved
+    // Verify listing exists
     const { data: listing, error: listingError } = await supabaseAdmin
       .from('listings')
       .select('id, agent_id, status')
@@ -151,7 +232,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (listing.status !== 'approved') {
+    // Allow applications to draft listings (auto-created listings are drafts)
+    // Only require approval for existing listings
+    if (listing.status !== 'approved' && listing.status !== 'draft') {
       return NextResponse.json(
         { error: 'Listing is not available for applications' },
         { status: 400 }

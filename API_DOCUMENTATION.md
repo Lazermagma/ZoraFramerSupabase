@@ -576,7 +576,7 @@ The API accepts both form field names (from frontend) and direct database field 
 **Form Field Names (from frontend):**
 ```json
 {
-  "listing_id": "...",  // required (can also use "property_id" or "property")
+  "listing_id": "...",  // optional - if not provided, a new listing will be auto-created (can also use "property_id" or "property")
   "message": "I'm interested...",  // optional
   "application_type": "Rent" | "Buy",  // optional - determines which budget field to use
   "property_type": "Property Seeker (Buyer/ Renter)",  // optional - metadata only
@@ -647,7 +647,14 @@ The API accepts both form field names (from frontend) and direct database field 
 ```
 
 **Field Mappings:**
-- `listing_id` (required) - Can also use `property_id` or `property` as alternative field names
+- `listing_id` (optional) - Can also use `property_id` or `property` as alternative field names. If not provided, the server will automatically create a new draft listing with:
+  - Title: Based on `property_type` or `application_type` if available
+  - Description: Uses the `message` field if provided
+  - Price: Estimated from `purchase_budget`/`purchase_budget_range` (for Buy) or `budget_range` (for Rent)
+  - Location: Uses `parish` or `country` if available
+  - Property Type: Uses `application_type` if available
+  - Status: Created as "draft" (can be updated later)
+  - Agent: If user is an agent, uses their ID; otherwise assigns to first available agent
 - `country` → `users.country_of_residence` (updates user profile)
 - `monthly_income` → `applications.monthly_income_range`
 - `purchase_budget` → `applications.purchase_budget_range`
@@ -688,7 +695,12 @@ Body (raw JSON):
 ```
 
 **Notes:** 
-- `listing_id` is **required**. You can also use `property_id` or `property` as alternative field names.
+- `listing_id` is **optional**. If not provided, the server will automatically create a new draft listing. You can also use `property_id` or `property` as alternative field names.
+- When auto-creating a listing, the system will:
+  - Use the authenticated user's ID as agent if they are an agent
+  - Otherwise, assign the listing to the first available agent in the system
+  - Create the listing with "draft" status (can be updated/approved later)
+  - Estimate the price from budget fields if available
 - All financial, employment, and declaration fields are optional. The form can be submitted with just `listing_id` and `message` if needed.
 - `documents` field accepts URLs to uploaded files. Supported file types: images (JPG, PNG, etc.), PDFs, and other document formats. Files should be uploaded to Supabase Storage first, then the URLs should be included in the application.
 - User profile fields (`first_name`, `last_name`, `phone`, `country`, `parish`) will automatically update the user's profile if provided.
