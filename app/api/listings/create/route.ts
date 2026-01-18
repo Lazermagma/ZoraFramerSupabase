@@ -2,7 +2,7 @@
  * POST /api/listings/create
  * 
  * Creates a new listing (Agent-only)
- * Listing is created with status = "pending_review"
+ * Listing is created with status = "draft" or "pending_review"
  * 
  * FRAMER REQUEST:
  * POST https://your-api.vercel.app/api/listings/create
@@ -15,7 +15,19 @@
  *     "description": "Property description",
  *     "price": 500000,
  *     "location": "123 Main St, City, State",
- *     "images": ["https://..."], // optional
+ *     "property_type": "Buy" | "Rent" | "Development",
+ *     "property_category": "Apartment" | "House" | "Townhouse" | "Condo" | "Land" | "Commercial",
+ *     "listing_type": "Rent" | "Sale" | "Development",
+ *     "street_address": "716 Kings Way",
+ *     "parish": "Kingston",
+ *     "bedrooms": "1" | "2" | "3" | "4+",
+ *     "bathrooms": "1" | "2" | "3" | "4+",
+ *     "interior_details": ["Furnished", "Gated", "Pool", "Parking", "Generator / Water Tank"],
+ *     "property_size": "1,990 Sqft",
+ *     "availability_status": "Available now" | "Under offer" | "Pre-construction" | "Coming soon",
+ *     "viewing_instructions": "Viewing by appointment only" | "Open to scheduled viewings" | "No viewings until further notice",
+ *     "images": ["https://..."],
+ *     "status": "draft" | "pending_review"
  *   }
  * 
  * RESPONSE:
@@ -62,7 +74,24 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body: CreateListingRequest = await request.json();
-    const { title, description, price, location, images } = body;
+    const { 
+      title, 
+      description, 
+      price, 
+      location, 
+      images,
+      property_type,
+      property_category,
+      listing_type,
+      street_address,
+      parish,
+      bedrooms,
+      bathrooms,
+      interior_details,
+      property_size,
+      availability_status,
+      viewing_instructions,
+    } = body;
 
     // Validate required fields
     if (!title || !description || !price || !location) {
@@ -98,6 +127,17 @@ export async function POST(request: NextRequest) {
         description,
         price,
         location,
+        property_type,
+        property_category,
+        listing_type,
+        street_address,
+        parish,
+        bedrooms,
+        bathrooms,
+        interior_details: interior_details || [],
+        property_size,
+        availability_status,
+        viewing_instructions,
         images: images || [],
         documents: body.documents || [],
         status: listingStatus,

@@ -21,6 +21,12 @@ export interface User {
   phone?: string;
   country_of_residence?: string;
   parish?: string;
+  // Agent/Lister Information
+  company_name?: string;
+  management_type?: 'Property Owner' | 'Real Estate Agent / Broker' | 'Property Developer';
+  is_registered_professional?: boolean;
+  rebj_registration_number?: string;
+  brokerage_company_name?: string;
   account_status: AccountStatus;
   created_at: string;
   updated_at: string;
@@ -42,6 +48,12 @@ export interface SignUpRequest {
   phone?: string;
   country_of_residence?: string;
   parish?: string;
+  // Agent/Lister Information (optional for signup)
+  company_name?: string;
+  management_type?: 'Property Owner' | 'Real Estate Agent / Broker' | 'Property Developer';
+  is_registered_professional?: boolean;
+  rebj_registration_number?: string;
+  brokerage_company_name?: string;
 }
 
 export interface SignInRequest {
@@ -56,6 +68,12 @@ export interface UpdateProfileRequest {
   phone?: string;
   country_of_residence?: string;
   parish?: string;
+  // Agent/Lister Information
+  company_name?: string;
+  management_type?: 'Property Owner' | 'Real Estate Agent / Broker' | 'Property Developer';
+  is_registered_professional?: boolean;
+  rebj_registration_number?: string;
+  brokerage_company_name?: string;
 }
 
 export interface UpdateEmailRequest {

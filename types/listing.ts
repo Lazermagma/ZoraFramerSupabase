@@ -21,6 +21,16 @@ export interface Listing {
   price: number;
   location: string;
   property_type?: PropertyType;
+  property_category?: 'Apartment' | 'House' | 'Townhouse' | 'Condo' | 'Land' | 'Commercial';
+  listing_type?: 'Rent' | 'Sale' | 'Development';
+  street_address?: string;
+  parish?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  interior_details?: string[];
+  property_size?: string;
+  availability_status?: 'Available now' | 'Under offer' | 'Pre-construction' | 'Coming soon';
+  viewing_instructions?: 'Viewing by appointment only' | 'Open to scheduled viewings' | 'No viewings until further notice';
   status: ListingStatus;
   images?: string[];
   documents?: string[];
@@ -32,13 +42,30 @@ export interface Listing {
 }
 
 export interface CreateListingRequest {
+  // Basic Information
   title: string;
   description: string;
   price: number;
   location: string;
+  
+  // Property Details
   property_type?: PropertyType;
+  property_category?: 'Apartment' | 'House' | 'Townhouse' | 'Condo' | 'Land' | 'Commercial';
+  listing_type?: 'Rent' | 'Sale' | 'Development';
+  street_address?: string;
+  parish?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  interior_details?: string[];
+  property_size?: string;
+  availability_status?: 'Available now' | 'Under offer' | 'Pre-construction' | 'Coming soon';
+  viewing_instructions?: 'Viewing by appointment only' | 'Open to scheduled viewings' | 'No viewings until further notice';
+  
+  // Media & Documents
   images?: string[];
   documents?: string[];
+  
+  // Status
   status?: 'draft' | 'pending_review';
 }
 
