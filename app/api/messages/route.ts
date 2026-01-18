@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
       .from('messages')
       .select(`
         *,
-        buyer:users!messages_buyer_id_fkey(id, first_name, last_name, name, email),
-        agent:users!messages_agent_id_fkey(id, first_name, last_name, name, email),
+        buyer:users!messages_buyer_id_fkey(id, first_name, last_name, name, email, phone),
+        agent:users!messages_agent_id_fkey(id, first_name, last_name, name, email, phone),
         listing:listings(id, title, location),
         application:applications(id, status)
       `);
@@ -185,8 +185,8 @@ export async function POST(request: NextRequest) {
       })
       .select(`
         *,
-        buyer:users!messages_buyer_id_fkey(id, first_name, last_name, name, email),
-        agent:users!messages_agent_id_fkey(id, first_name, last_name, name, email),
+        buyer:users!messages_buyer_id_fkey(id, first_name, last_name, name, email, phone),
+        agent:users!messages_agent_id_fkey(id, first_name, last_name, name, email, phone),
         listing:listings(id, title, location),
         application:applications(id, status)
       `)
