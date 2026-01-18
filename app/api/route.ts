@@ -39,10 +39,21 @@ export async function GET(request: NextRequest) {
         'POST /api/listings/approve': 'Approve listing (Admin-only)',
         'POST /api/listings/reject': 'Reject listing (Admin-only)',
         'GET /api/listings/browse': 'Browse approved listings (Public)',
+        'GET /api/listings/recently-viewed': 'Get recently viewed properties (Buyer-only)',
+        'POST /api/listings/recently-viewed': 'Track view and get recently viewed properties (Buyer-only)',
+        'POST /api/listings/track-view': 'Track property view (Buyer-only)',
         
         // Applications
         'POST /api/applications/create': 'Create application (Buyer-only)',
         'POST /api/applications/update-status': 'Update application status (Agent-only)',
+        
+        // Saved Searches
+        'GET /api/saved-searches': 'Get saved searches (Buyer-only)',
+        'POST /api/saved-searches': 'Create saved search (Buyer-only)',
+        
+        // Messages
+        'GET /api/messages': 'Get messages (Buyer/Agent)',
+        'POST /api/messages': 'Send message (Buyer/Agent)',
         
         // Payments
         'POST /api/stripe/checkout': 'Create Stripe checkout session',
