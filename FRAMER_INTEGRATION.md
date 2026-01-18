@@ -157,14 +157,50 @@ export async function getRecentlyViewedProperties(limit = 10) {
 }
 ```
 
+**Endpoint (POST):** `POST /api/listings/recently-viewed`
+
+Track a property view and get the updated recently viewed list in one call.
+
+**Framer Code:**
+```javascript
+export async function trackViewAndGetRecentlyViewed(listingId, limit = 10) {
+  const response = await fetch('https://your-api.vercel.app/api/listings/recently-viewed', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${supabaseAccessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      listing_id: listingId,
+      limit: limit,
+    }),
+  });
+
+  const data = await response.json();
+  
+  if (response.ok) {
+    return data.properties; // Array of recently viewed properties
+  } else {
+    throw new Error(data.error);
+  }
+}
+```
+
 **Usage in RecentlyViewedProperties Component:**
 Set the API configuration in your component:
 ```javascript
+// For GET requests (just viewing the list)
 api: {
   url: "https://your-api.vercel.app/api/listings/recently-viewed",
   tokenStorageKey: "auth_token",
   dataPath: "properties",
 }
+
+// For POST requests (track view and get list)
+// Call when a user views a property:
+trackViewAndGetRecentlyViewed(listingId).then(properties => {
+  // Update component with new properties list
+});
 ```
 
 ### 6. Track Property View

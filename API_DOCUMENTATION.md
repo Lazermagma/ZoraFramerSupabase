@@ -918,11 +918,59 @@ curl -X GET "https://your-api.vercel.app/api/listings/recently-viewed?limit=10" 
   -H "Authorization: Bearer <token>"
 ```
 
+**POST Request:**
+Tracks a property view and returns the updated recently viewed properties list.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "listing_id": "listing-uuid",
+  "limit": 10
+}
+```
+
+**Response (200):**
+```json
+{
+  "properties": [
+    {
+      "id": "listing-id",
+      "title": "Modern Luxury Apartment",
+      "location": "Kingston, Jamaica",
+      "viewed_at": "2024-01-15T10:30:00Z",
+      ...
+    }
+  ],
+  "message": "View tracked successfully"
+}
+```
+
+**Example POST Request:**
+```bash
+curl -X POST "https://your-api.vercel.app/api/listings/recently-viewed" \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "listing_id": "listing-uuid",
+    "limit": 10
+  }'
+```
+
 **Response Fields:**
 - `properties`: Array of recently viewed properties, sorted by most recently viewed first
 - Each property includes full listing details plus `viewed_at` timestamp
 - Properties are filtered to only show approved listings
 - Includes backward compatibility fields (`property_name`, `image`, `primary_image`, `address`)
+- `message`: Confirmation message when using POST method
+
+**POST Behavior:**
+- Tracks/updates the view timestamp for the listing
+- Increments the listing's view count
+- Only tracks views for approved listings
+- Returns the updated recently viewed properties list
+- Uses upsert to update existing views (updates `viewed_at` timestamp)
 
 ---
 
