@@ -445,6 +445,118 @@ VALUES
         0,
         NOW() - INTERVAL '3 days',
         NULL
+    ),
+    -- Listing 9: Affordable Apartment for Rent
+    (
+        'd0000000-0000-0000-0000-000000000009'::UUID,
+        'a0000000-0000-0000-0000-000000000001'::UUID,
+        'Cozy Studio Apartment in Kingston',
+        'Affordable studio apartment perfect for students or young professionals. Features include fully furnished space, modern kitchenette, secure building, and walking distance to universities and business districts. Great starter home with all utilities included.',
+        65000.00,
+        'Kingston, Jamaica',
+        'Rent',
+        'Apartment',
+        'Rent',
+        '234 University Avenue',
+        'Kingston',
+        '1',
+        '1',
+        ARRAY['Furnished', 'Parking'],
+        '650 Sqft',
+        'Available now',
+        'Open to scheduled viewings',
+        'approved',
+        ARRAY[
+            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
+            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'
+        ],
+        38,
+        NOW() - INTERVAL '18 days',
+        NOW() - INTERVAL '15 days'
+    ),
+    -- Listing 10: Luxury Beachfront Villa
+    (
+        'd0000000-0000-0000-0000-000000000010'::UUID,
+        'a0000000-0000-0000-0000-000000000004'::UUID,
+        'Beachfront Villa in Montego Bay',
+        'Magnificent beachfront villa with direct beach access. Features 5 bedrooms, 4 bathrooms, private infinity pool, outdoor kitchen, multiple balconies with ocean views, and landscaped gardens. Perfect for vacation rental or luxury living.',
+        18000000.00,
+        'Montego Bay, Jamaica',
+        'Buy',
+        'House',
+        'Sale',
+        'Beachfront Drive, Montego Bay',
+        'Montego Bay',
+        '5',
+        '4',
+        ARRAY['Gated', 'Pool', 'Parking', 'Generator / Water Tank'],
+        '6,200 Sqft',
+        'Available now',
+        'Viewing by appointment only',
+        'approved',
+        ARRAY[
+            'https://images.unsplash.com/photo-1600585152915-d208bec867a1?w=800',
+            'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800'
+        ],
+        67,
+        NOW() - INTERVAL '12 days',
+        NOW() - INTERVAL '8 days'
+    ),
+    -- Listing 11: Modern Loft Apartment
+    (
+        'd0000000-0000-0000-0000-000000000011'::UUID,
+        'a0000000-0000-0000-0000-000000000002'::UUID,
+        'Urban Loft in Downtown Kingston',
+        'Stylish urban loft apartment in the heart of downtown. Features high ceilings, exposed brick walls, modern appliances, open floor plan, and rooftop access. Perfect for young professionals seeking modern city living.',
+        135000.00,
+        'Kingston, Jamaica',
+        'Rent',
+        'Apartment',
+        'Rent',
+        '567 Downtown Plaza',
+        'Kingston',
+        '2',
+        '2',
+        ARRAY['Furnished', 'Parking'],
+        '1,200 Sqft',
+        'Available now',
+        'Open to scheduled viewings',
+        'approved',
+        ARRAY[
+            'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800',
+            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'
+        ],
+        42,
+        NOW() - INTERVAL '14 days',
+        NOW() - INTERVAL '11 days'
+    ),
+    -- Listing 12: Family Home for Sale
+    (
+        'd0000000-0000-0000-0000-000000000012'::UUID,
+        'a0000000-0000-0000-0000-000000000001'::UUID,
+        'Spacious Family Home in Portmore',
+        'Beautiful 4-bedroom family home in quiet residential neighborhood. Features large backyard, double car garage, modern kitchen, spacious living areas, and walking distance to schools and parks. Perfect for growing families.',
+        7200000.00,
+        'Portmore, Jamaica',
+        'Buy',
+        'House',
+        'Sale',
+        '789 Family Circle',
+        'Portmore',
+        '4',
+        '3',
+        ARRAY['Gated', 'Parking', 'Generator / Water Tank'],
+        '3,200 Sqft',
+        'Available now',
+        'Open to scheduled viewings',
+        'approved',
+        ARRAY[
+            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
+            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'
+        ],
+        54,
+        NOW() - INTERVAL '9 days',
+        NOW() - INTERVAL '6 days'
     )
 ON CONFLICT DO NOTHING;
 
