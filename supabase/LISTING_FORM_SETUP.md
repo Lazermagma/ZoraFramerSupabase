@@ -173,32 +173,57 @@ const response = await fetch('https://your-api.vercel.app/api/listings/create', 
 
 ### Get Recently Viewed Properties
 
-You can query property views to get recently viewed properties:
+**API Endpoint:** `GET /api/listings/recently-viewed`
 
-```sql
--- Get recently viewed properties for a buyer
-SELECT 
-    l.*,
-    pv.viewed_at
-FROM public.listings l
-JOIN public.property_views pv ON l.id = pv.listing_id
-WHERE pv.buyer_id = 'buyer-user-id-here'
-ORDER BY pv.viewed_at DESC
-LIMIT 10;
-```
+This endpoint returns recently viewed properties for the authenticated buyer.
 
-Or create a GET endpoint that returns this data:
+**Framer Component Usage:**
 
 ```javascript
-// In your API route or Framer component
-const response = await fetch('https://your-api.vercel.app/api/listings/browse', {
+// In your RecentlyViewedProperties component, set the API URL:
+api: {
+  url: "https://your-api.vercel.app/api/listings/recently-viewed",
+  tokenStorageKey: "auth_token",
+  dataPath: "properties", // The response has a "properties" array
+  authToken: "", // Leave empty to use token from localStorage
+}
+```
+
+**Example Request:**
+```javascript
+const response = await fetch('https://your-api.vercel.app/api/listings/recently-viewed?limit=10', {
   method: 'GET',
   headers: {
     'Authorization': `Bearer ${supabaseAccessToken}`,
   }
 });
 
-// Then filter by property views or create a new endpoint
+const data = await response.json();
+// data.properties contains array of recently viewed listings
+```
+
+**Response Format:**
+```json
+{
+  "properties": [
+    {
+      "id": "listing-id",
+      "title": "Property Title",
+      "location": "Location",
+      "images": ["https://..."],
+      "viewed_at": "2024-01-15T10:30:00Z",
+      ...
+    }
+  ]
+}
+```
+
+The endpoint automatically:
+- Authenticates the buyer
+- Joins property_views with listings table
+- Returns only approved listings
+- Sorts by most recently viewed first
+- Includes all listing fields plus viewed_at timestamp
 ```
 
 ## Next Steps

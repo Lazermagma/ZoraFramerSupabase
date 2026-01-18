@@ -866,6 +866,66 @@ Tracks when a buyer views a property listing.
 
 ---
 
+### GET /api/listings/recently-viewed
+
+Gets recently viewed properties for the authenticated buyer.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters (optional):**
+- `limit`: Number of results to return (default: 10, max: 50)
+
+**Response (200):**
+```json
+{
+  "properties": [
+    {
+      "id": "listing-id",
+      "listing_id": "listing-id",
+      "title": "Modern Luxury Apartment",
+      "description": "Beautiful 2-bedroom apartment...",
+      "location": "Kingston, Jamaica",
+      "street_address": "716 Kings Way",
+      "parish": "Kingston",
+      "price": 120000,
+      "property_type": "Rent",
+      "property_category": "Apartment",
+      "listing_type": "Rent",
+      "bedrooms": "2",
+      "bathrooms": "2",
+      "interior_details": ["Furnished", "Gated", "Pool"],
+      "property_size": "1,990 Sqft",
+      "availability_status": "Available now",
+      "viewing_instructions": "Viewing by appointment only",
+      "images": ["https://..."],
+      "views": 45,
+      "status": "approved",
+      "viewed_at": "2024-01-15T10:30:00Z",
+      "created_at": "2024-01-01T00:00:00Z",
+      "published_at": "2024-01-02T00:00:00Z",
+      "property_name": "Modern Luxury Apartment",
+      "image": "https://...",
+      "primary_image": "https://...",
+      "address": "Kingston, Jamaica"
+    }
+  ]
+}
+```
+
+**Example Request:**
+```bash
+curl -X GET "https://your-api.vercel.app/api/listings/recently-viewed?limit=10" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Response Fields:**
+- `properties`: Array of recently viewed properties, sorted by most recently viewed first
+- Each property includes full listing details plus `viewed_at` timestamp
+- Properties are filtered to only show approved listings
+- Includes backward compatibility fields (`property_name`, `image`, `primary_image`, `address`)
+
+---
+
 ## Saved Searches Endpoints
 
 ### GET /api/saved-searches

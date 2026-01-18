@@ -133,6 +133,70 @@ export async function updateApplicationStatus(applicationId, status) {
 }
 ```
 
+### 5. Get Recently Viewed Properties
+
+**Endpoint:** `GET /api/listings/recently-viewed`
+
+**Framer Code:**
+```javascript
+export async function getRecentlyViewedProperties(limit = 10) {
+  const response = await fetch(`https://your-api.vercel.app/api/listings/recently-viewed?limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${supabaseAccessToken}`,
+    },
+  });
+
+  const data = await response.json();
+  
+  if (response.ok) {
+    return data.properties; // Array of recently viewed properties
+  } else {
+    throw new Error(data.error);
+  }
+}
+```
+
+**Usage in RecentlyViewedProperties Component:**
+Set the API configuration in your component:
+```javascript
+api: {
+  url: "https://your-api.vercel.app/api/listings/recently-viewed",
+  tokenStorageKey: "auth_token",
+  dataPath: "properties",
+}
+```
+
+### 6. Track Property View
+
+**Endpoint:** `POST /api/listings/track-view`
+
+Call this when a buyer views a property listing to track their viewing history.
+
+**Framer Code:**
+```javascript
+export async function trackPropertyView(listingId) {
+  const response = await fetch('https://your-api.vercel.app/api/listings/track-view', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${supabaseAccessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      listing_id: listingId,
+    }),
+  });
+
+  const data = await response.json();
+  
+  if (response.ok) {
+    return data.message;
+  } else {
+    throw new Error(data.error);
+  }
+}
+```
+
 ## Error Handling
 
 All endpoints return errors in this format:
